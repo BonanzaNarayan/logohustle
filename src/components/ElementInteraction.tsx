@@ -179,24 +179,22 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
         const scaleX = element.width / 24;
         const scaleY = element.height / 24;
         
-        // These are attributes we don't need on the <g> tag.
         const { 
             width, 
             height, 
             xmlns, 
             viewBox,
-            ...restSvgAttrs // This captures fill, stroke, strokeWidth, etc.
+            stroke, // We are overriding this on the children
+            ...restSvgAttrs
         } = svgAttrs as any;
 
         return (
           <g
             transform={`scale(${scaleX} ${scaleY})`}
             {...restSvgAttrs}
-            stroke={iconEl.color} // Override the 'currentColor' from lucide with our element's color.
           >
             {children.map(([tag, attrs]: [string, any], i: number) => {
-                // The children elements from lucide have no styling, they inherit from the parent.
-                return React.createElement(tag, { key: i, ...attrs });
+                return React.createElement(tag, { key: i, ...attrs, stroke: iconEl.color });
             })}
           </g>
         );
@@ -204,13 +202,13 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
       case 'shape':
         const shapeEl = element as ShapeElement;
         if (shapeEl.shape === 'rectangle') {
-            return <rect x="0" y="0" width={shapeEl.width} height={shapeEl.height} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
+            return <rect x="0" y="0" width={element.width} height={element.height} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
         }
         if (shapeEl.shape === 'circle') {
-            return <circle cx={shapeEl.width / 2} cy={shapeEl.height / 2} r={Math.min(shapeEl.width, shapeEl.height) / 2} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
+            return <circle cx={element.width / 2} cy={element.height / 2} r={Math.min(element.width, element.height) / 2} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
         }
         if (shapeEl.shape === 'triangle') {
-            return <polygon points={`${shapeEl.width / 2},0 0,${shapeEl.height} ${shapeEl.width},${shapeEl.height}`} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
+            return <polygon points={`${element.width / 2},0 0,${element.height} ${element.width},${element.height}`} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
         }
         return null;
     case 'image':
