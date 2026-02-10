@@ -104,7 +104,7 @@ export function Toolbar() {
     <header className="h-16 flex items-center justify-between px-4 border-b border-border bg-card">
       <div className="flex items-center gap-3">
         <Logo />
-        <h1 className="text-lg font-semibold text-foreground">LogoHustle</h1>
+        <h1 className="text-2xl text-foreground font-stylish">LogoHustle</h1>
       </div>
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={() => dispatch({type: 'UNDO'})} disabled={!canUndo} aria-label="Undo">
