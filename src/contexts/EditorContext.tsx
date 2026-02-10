@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useReducer, useEffect, ReactNode, Dispatch, useState } from "react";
+import { createContext, useReducer, useEffect, ReactNode, Dispatch, useState, SetStateAction } from "react";
 import { CanvasElement, IconElement, ShapeElement, TextElement, ImageElement } from "@/lib/types";
 import { nanoid } from "nanoid";
 import { Loader2 } from "lucide-react";
@@ -58,7 +58,7 @@ const initialCanvasState = {
   width: 512,
   height: 512,
   backgroundType: 'solid',
-  background: '#ffffff',
+  background: '#111827',
   gradient: {
     color1: '#ffffff',
     color2: '#d4d4d8',
@@ -275,12 +275,15 @@ export const EditorContext = createContext<{
   dispatch: Dispatch<Action>;
   isSnapping: boolean;
   setIsSnapping: (isSnapping: boolean) => void;
+  snapLines: { x: number[]; y: number[] };
+  setSnapLines: Dispatch<SetStateAction<{ x: number[]; y: number[] }>>;
 } | null>(null);
 
 export function EditorProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(editorReducer, initialState);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSnapping, setIsSnapping] = useState(true);
+  const [snapLines, setSnapLines] = useState<{ x: number[]; y: number[] }>({ x: [], y: [] });
 
   useEffect(() => {
     const savedState = localStorage.getItem("logoForgeState");
@@ -312,7 +315,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <EditorContext.Provider value={{ state, dispatch, isSnapping, setIsSnapping }}>
+    <EditorContext.Provider value={{ state, dispatch, isSnapping, setIsSnapping, snapLines, setSnapLines }}>
       {children}
     </EditorContext.Provider>
   );

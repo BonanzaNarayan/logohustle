@@ -4,7 +4,7 @@ import { useEditor } from "@/hooks/useEditor";
 import { ElementInteraction } from "./ElementInteraction";
 
 export function Canvas() {
-  const { state, dispatch } = useEditor();
+  const { state, dispatch, snapLines } = useEditor();
   const { canvas, elements } = state;
 
   const handleCanvasMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -88,6 +88,13 @@ export function Canvas() {
           <ElementInteraction key={element.id} element={element}>
             {/* The actual rendering is handled inside ElementInteraction for simplicity */}
           </ElementInteraction>
+        ))}
+
+        {snapLines.x.map((x, i) => (
+          <line key={`snap-x-${i}`} x1={x} y1={0} x2={x} y2={canvas.height} stroke="hsl(var(--ring))" strokeWidth="1" strokeDasharray="3,3" />
+        ))}
+        {snapLines.y.map((y, i) => (
+          <line key={`snap-y-${i}`} x1={0} y1={y} x2={canvas.width} y2={y} stroke="hsl(var(--ring))" strokeWidth="1" strokeDasharray="3,3" />
         ))}
       </svg>
     </div>

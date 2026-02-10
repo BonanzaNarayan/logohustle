@@ -9,7 +9,7 @@ export const useEditor = () => {
     throw new Error("useEditor must be used within an EditorProvider");
   }
   
-  const { state, dispatch, isSnapping, setIsSnapping } = context;
+  const { state, dispatch, isSnapping, setIsSnapping, snapLines, setSnapLines } = context;
   const { history, historyIndex, clipboard } = state;
   const present = history[historyIndex];
 
@@ -21,5 +21,7 @@ export const useEditor = () => {
     canRedo: historyIndex < history.length - 1,
     isSnapping,
     setIsSnapping,
+    snapLines,
+    setSnapLines
   };
 };

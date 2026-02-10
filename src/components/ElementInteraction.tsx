@@ -6,7 +6,7 @@ import { useEditor } from "@/hooks/useEditor";
 import { LucideIcon } from "@/lib/lucide-icons";
 
 export const ElementInteraction = React.memo(function ElementInteraction({ element }: { element: CanvasElement }) {
-  const { state, dispatch, isSnapping } = useEditor();
+  const { state, dispatch, isSnapping, setSnapLines } = useEditor();
   const { elements, canvas } = state;
   const [interaction, setInteraction] = useState<'drag' | 'resize' | 'rotate' | null>(null);
   const interactionRef = useRef<{
@@ -74,6 +74,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
       if (interaction === 'drag') {
         let finalDx = dx;
         let finalDy = dy;
+        const newSnapLines: { x: number[]; y: number[] } = { x: [], y: [] };
         
         if (isSnapping) {
             const snapThreshold = 5;
@@ -89,17 +90,18 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
             };
 
             const otherElements = elements.filter(el => el.id !== startElement.id);
-            const xTargets = [canvas.width / 2, ...otherElements.flatMap(el => [el.x, el.x + el.width, el.x + el.width/2])];
-            const yTargets = [canvas.height / 2, ...otherElements.flatMap(el => [el.y, el.y + el.height, el.y + el.height/2])];
+            const xTargets = [0, canvas.width / 2, canvas.width, ...otherElements.flatMap(el => [el.x, el.x + el.width, el.x + el.width/2])];
+            const yTargets = [0, canvas.height / 2, canvas.height, ...otherElements.flatMap(el => [el.y, el.y + el.height, el.y + el.height/2])];
             
-            let bestSnapX = { dist: snapThreshold, offset: 0 };
-            let bestSnapY = { dist: snapThreshold, offset: 0 };
+            let bestSnapX = { dist: snapThreshold, offset: 0, target: -1 };
+            let bestSnapY = { dist: snapThreshold, offset: 0, target: -1 };
 
-            const checkSnap = (pos: number, target: number, best: {dist: number, offset: number}) => {
+            const checkSnap = (pos: number, target: number, best: typeof bestSnapX) => {
                 const dist = Math.abs(pos - target);
                 if (dist < best.dist) {
                     best.dist = dist;
                     best.offset = target - pos;
+                    best.target = target;
                 }
             };
 
@@ -115,13 +117,17 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
                 checkSnap(currentBox.centerY, target, bestSnapY);
             }
             
-            if (bestSnapX.dist < snapThreshold) {
+            if (bestSnapX.target !== -1) {
                 finalDx += bestSnapX.offset;
+                newSnapLines.x.push(bestSnapX.target);
             }
-            if (bestSnapY.dist < snapThreshold) {
+            if (bestSnapY.target !== -1) {
                 finalDy += bestSnapY.offset;
+                newSnapLines.y.push(bestSnapY.target);
             }
         }
+        
+        setSnapLines(newSnapLines);
         
         dispatch({
             type: 'UPDATE_ELEMENT',
@@ -173,6 +179,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
     const handleMouseUp = () => {
       setInteraction(null);
       interactionRef.current = null;
+      setSnapLines({ x: [], y: [] });
     };
     
     if (interaction) {
@@ -183,8 +190,9 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      setSnapLines({ x: [], y: [] });
     };
-  }, [interaction, dispatch, element.id, isSnapping, elements, canvas.width, canvas.height]);
+  }, [interaction, dispatch, element.id, isSnapping, elements, canvas.width, canvas.height, setSnapLines]);
   
   const handleSize = 8;
   const cursors: {[key: string]: string} = {
