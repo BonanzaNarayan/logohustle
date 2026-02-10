@@ -13,6 +13,7 @@ export type EditorState = {
   };
   elements: CanvasElement[];
   selectedElement: CanvasElement | null;
+  clipboard: CanvasElement | null;
 };
 
 export type Action =
@@ -21,7 +22,10 @@ export type Action =
   | { type: "UPDATE_ELEMENT"; payload: Partial<CanvasElement> & { id: string } }
   | { type: "DELETE_ELEMENT"; payload: { id: string } }
   | { type: "SELECT_ELEMENT"; payload: { id: string | null } }
-  | { type: "UPDATE_CANVAS"; payload: Partial<EditorState['canvas']> };
+  | { type: "UPDATE_CANVAS"; payload: Partial<EditorState['canvas']> }
+  | { type: 'COPY_ELEMENT' }
+  | { type: 'PASTE_ELEMENT' }
+  | { type: 'DUPLICATE_ELEMENT' };
 
 const initialState: EditorState = {
   canvas: {
@@ -31,12 +35,13 @@ const initialState: EditorState = {
   },
   elements: [],
   selectedElement: null,
+  clipboard: null,
 };
 
 function editorReducer(state: EditorState, action: Action): EditorState {
   switch (action.type) {
     case "LOAD_STATE":
-      return action.payload;
+      return { ...initialState, ...action.payload, clipboard: null };
     case "ADD_ELEMENT": {
       const { type, data } = action.payload;
       const newElementDefaults = {
@@ -138,6 +143,41 @@ function editorReducer(state: EditorState, action: Action): EditorState {
             canvas: { ...state.canvas, ...action.payload },
         };
     }
+    case 'COPY_ELEMENT': {
+        if (!state.selectedElement) return state;
+        return {
+            ...state,
+            clipboard: { ...state.selectedElement }
+        };
+    }
+    case 'PASTE_ELEMENT': {
+        if (!state.clipboard) return state;
+        const newElement = {
+            ...state.clipboard,
+            id: nanoid(),
+            x: state.clipboard.x + 20,
+            y: state.clipboard.y + 20,
+        };
+        return {
+            ...state,
+            elements: [...state.elements, newElement],
+            selectedElement: newElement
+        };
+    }
+    case 'DUPLICATE_ELEMENT': {
+        if (!state.selectedElement) return state;
+        const newElement = {
+            ...state.selectedElement,
+            id: nanoid(),
+            x: state.selectedElement.x + 20,
+            y: state.selectedElement.y + 20,
+        };
+        return {
+            ...state,
+            elements: [...state.elements, newElement],
+            selectedElement: newElement
+        };
+    }
     default:
       return state;
   }
@@ -167,7 +207,8 @@ export function EditorProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if(isLoaded) {
-      localStorage.setItem("logoForgeState", JSON.stringify(state));
+      const stateToSave = { ...state, clipboard: null };
+      localStorage.setItem("logoForgeState", JSON.stringify(stateToSave));
     }
   }, [state, isLoaded]);
 
