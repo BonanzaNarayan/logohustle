@@ -1,3 +1,5 @@
+
+import React from 'react';
 import { icons } from 'lucide-react';
 
 // A curated list of icons for the editor
@@ -50,5 +52,5 @@ export const LucideIcon = ({ name, ...props }: { name: string, className?: strin
     return null;
   }
 
-  return <IconComponent {...props} />;
+  return React.createElement(IconComponent, props);
 };
