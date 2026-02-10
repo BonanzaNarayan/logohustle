@@ -179,10 +179,16 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
 
         const scaleX = element.width / 24;
         const scaleY = element.height / 24;
+        
+        const kebabToCamel = (str: string) => str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
 
-        // The svgAttrs from lucide-react contains properties like
-        // width, height, viewBox, and importantly `stroke: "currentColor"`.
-        // We'll pass most of these down to the group element.
+        const processAttrs = (attrs: Record<string, any>) => {
+          return Object.entries(attrs).reduce((acc, [key, value]) => {
+            acc[kebabToCamel(key)] = value;
+            return acc;
+          }, {} as Record<string, any>);
+        };
+
         const { 
             width, 
             height, 
@@ -191,19 +197,17 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
             ...restSvgAttrs
         } = svgAttrs as any;
 
+        const processedSvgAttrs = processAttrs(restSvgAttrs);
+
         return (
-          // This group scales the icon to the correct size.
-          // We spread the rest of the SVG attributes, which includes `fill`, `stroke-width`, etc.
-          // We then explicitly set the `stroke` to the element's color. This will be inherited
-          // by all children that have `stroke="currentColor"` (which is the default for lucide icons).
           <g
             transform={`scale(${scaleX} ${scaleY})`}
-            {...restSvgAttrs}
+            {...processedSvgAttrs}
             stroke={iconEl.color}
           >
-            {/* The children are the actual paths, lines, etc. We render them as-is. */}
             {children.map(([childTag, childAttrs]: [string, any], i: number) => {
-              return React.createElement(childTag, { key: i, ...childAttrs });
+              const processedChildAttrs = processAttrs(childAttrs);
+              return React.createElement(childTag, { key: i, ...processedChildAttrs });
             })}
           </g>
         );
