@@ -183,6 +183,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
           <g
             transform={`scale(${scaleX} ${scaleY})`}
             stroke={iconEl.color}
+            color={iconEl.color}
             strokeWidth="2"
             fill="none"
             strokeLinecap="round"
