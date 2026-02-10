@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Download, FileJson, Image as ImageIcon, Undo2, Redo2, Trash2 } from "lucide-react";
+import { Download, FileJson, Image as ImageIcon, Undo2, Redo2, Trash2, Magnet } from "lucide-react";
 import { useEditor } from "@/hooks/useEditor";
 import { downloadFile } from "@/lib/download";
 import { useToast } from "@/hooks/use-toast";
@@ -23,9 +23,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 export function Toolbar() {
-  const { state, dispatch, canUndo, canRedo } = useEditor();
+  const { state, dispatch, canUndo, canRedo, isSnapping, setIsSnapping } = useEditor();
   const { toast } = useToast();
 
   const getSvgString = () => {
@@ -107,13 +108,30 @@ export function Toolbar() {
         <h1 className="text-2xl text-foreground font-stylish">LogoHustle</h1>
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={() => dispatch({type: 'UNDO'})} disabled={!canUndo} aria-label="Undo">
-            <Undo2 />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={() => dispatch({type: 'REDO'})} disabled={!canRedo} aria-label="Redo">
-            <Redo2 />
-        </Button>
-
+        <TooltipProvider>
+          <Button variant="ghost" size="icon" onClick={() => dispatch({type: 'UNDO'})} disabled={!canUndo} aria-label="Undo">
+              <Undo2 />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => dispatch({type: 'REDO'})} disabled={!canRedo} aria-label="Redo">
+              <Redo2 />
+          </Button>
+          <Tooltip>
+              <TooltipTrigger asChild>
+                  <Button 
+                    variant={isSnapping ? 'secondary' : 'ghost'} 
+                    size="icon" 
+                    onClick={() => setIsSnapping(!isSnapping)} 
+                    aria-label="Toggle Snapping"
+                  >
+                      <Magnet />
+                  </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                  <p>Toggle Snapping</p>
+              </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="ghost" size="icon" aria-label="Clear Canvas">

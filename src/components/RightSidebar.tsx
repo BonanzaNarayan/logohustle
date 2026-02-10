@@ -9,6 +9,7 @@ import { StyleProperties } from "./properties/StyleProperties";
 import { TextProperties } from "./properties/TextProperties";
 import { ShapeProperties } from "./properties/ShapeProperties";
 import { CanvasBackgroundProperties } from "./properties/CanvasBackgroundProperties";
+import { IconProperties } from "./properties/IconProperties";
 
 export function RightSidebar() {
   const { state, dispatch } = useEditor();
@@ -32,6 +33,7 @@ export function RightSidebar() {
             <StyleProperties />
             {selectedElement.type === 'text' && <TextProperties />}
             {selectedElement.type === 'shape' && <ShapeProperties />}
+            {selectedElement.type === 'icon' && <IconProperties />}
             
             <Button variant="destructive" className="w-full" onClick={handleDelete}>
               <Trash className="mr-2 h-4 w-4" />

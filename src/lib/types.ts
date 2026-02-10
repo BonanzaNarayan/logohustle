@@ -29,6 +29,8 @@ export type IconElement = BaseElement & {
   type: 'icon';
   name: string;
   color: string;
+  fill: string;
+  strokeWidth: number;
 };
 
 export type ShapeType = 'rectangle' | 'circle' | 'triangle' | 'star' | 'hexagon';

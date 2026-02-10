@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { CanvasElement, TextElement, IconElement, ShapeElement, ImageElement } from "@/lib/types";
 import { useEditor } from "@/hooks/useEditor";
-import { icons } from "lucide-react";
 import { LucideIcon } from "@/lib/lucide-icons";
 
 export const ElementInteraction = React.memo(function ElementInteraction({ element }: { element: CanvasElement }) {
-  const { state, dispatch } = useEditor();
+  const { state, dispatch, isSnapping } = useEditor();
+  const { elements, canvas } = state;
   const [interaction, setInteraction] = useState<'drag' | 'resize' | 'rotate' | null>(null);
   const interactionRef = useRef<{
     startPoint: { x: number; y: number };
@@ -66,22 +66,74 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
     const handleMouseMove = (e: MouseEvent) => {
       if (!interaction || !interactionRef.current) return;
 
-      const { svg, startPoint, startElement, resizeDirection, center, startAngle } = interactionRef.current;
+      const { svg, startPoint, startElement } = interactionRef.current;
       const currentPoint = getSVGPoint(e, svg);
       const dx = currentPoint.x - startPoint.x;
       const dy = currentPoint.y - startPoint.y;
 
       if (interaction === 'drag') {
+        let finalDx = dx;
+        let finalDy = dy;
+        
+        if (isSnapping) {
+            const snapThreshold = 5;
+            const currentElPos = { x: startElement.x + dx, y: startElement.y + dy };
+            
+            const currentBox = {
+                left: currentElPos.x,
+                right: currentElPos.x + startElement.width,
+                centerX: currentElPos.x + startElement.width / 2,
+                top: currentElPos.y,
+                bottom: currentElPos.y + startElement.height,
+                centerY: currentElPos.y + startElement.height / 2
+            };
+
+            const otherElements = elements.filter(el => el.id !== startElement.id);
+            const xTargets = [canvas.width / 2, ...otherElements.flatMap(el => [el.x, el.x + el.width, el.x + el.width/2])];
+            const yTargets = [canvas.height / 2, ...otherElements.flatMap(el => [el.y, el.y + el.height, el.y + el.height/2])];
+            
+            let bestSnapX = { dist: snapThreshold, offset: 0 };
+            let bestSnapY = { dist: snapThreshold, offset: 0 };
+
+            const checkSnap = (pos: number, target: number, best: {dist: number, offset: number}) => {
+                const dist = Math.abs(pos - target);
+                if (dist < best.dist) {
+                    best.dist = dist;
+                    best.offset = target - pos;
+                }
+            };
+
+            for (const target of xTargets) {
+                checkSnap(currentBox.left, target, bestSnapX);
+                checkSnap(currentBox.right, target, bestSnapX);
+                checkSnap(currentBox.centerX, target, bestSnapX);
+            }
+            
+            for (const target of yTargets) {
+                checkSnap(currentBox.top, target, bestSnapY);
+                checkSnap(currentBox.bottom, target, bestSnapY);
+                checkSnap(currentBox.centerY, target, bestSnapY);
+            }
+            
+            if (bestSnapX.dist < snapThreshold) {
+                finalDx += bestSnapX.offset;
+            }
+            if (bestSnapY.dist < snapThreshold) {
+                finalDy += bestSnapY.offset;
+            }
+        }
+        
         dispatch({
-          type: 'UPDATE_ELEMENT',
-          payload: { id: element.id, x: startElement.x + dx, y: startElement.y + dy },
+            type: 'UPDATE_ELEMENT',
+            payload: { id: element.id, x: startElement.x + finalDx, y: startElement.y + finalDy },
         });
-      } else if (interaction === 'rotate' && center && startAngle !== undefined) {
+      } else if (interaction === 'rotate' && interactionRef.current.center && interactionRef.current.startAngle !== undefined) {
+        const { center, startAngle } = interactionRef.current;
         const angle = Math.atan2(currentPoint.y - center.y, currentPoint.x - center.x) * (180 / Math.PI);
         let newRotation = angle - startAngle;
         dispatch({ type: 'UPDATE_ELEMENT', payload: { id: element.id, rotation: newRotation } });
-      } else if (interaction === 'resize' && resizeDirection) {
-        
+      } else if (interaction === 'resize' && interactionRef.current.resizeDirection) {
+        const { resizeDirection } = interactionRef.current;
         const rad = startElement.rotation * Math.PI / 180;
         const cos = Math.cos(rad);
         const sin = Math.sin(rad);
@@ -132,7 +184,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [interaction, dispatch, element.id]);
+  }, [interaction, dispatch, element.id, isSnapping, elements, canvas.width, canvas.height]);
   
   const handleSize = 8;
   const cursors: {[key: string]: string} = {
@@ -175,9 +227,10 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
           <LucideIcon
             name={iconEl.name}
             color={iconEl.color}
+            fill={iconEl.fill}
+            strokeWidth={iconEl.strokeWidth}
             width={element.width}
             height={element.height}
-            strokeWidth="2"
           />
         );
       }
