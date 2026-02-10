@@ -23,8 +23,67 @@ export function Canvas() {
         height={canvas.height}
         viewBox={`0 0 ${canvas.width} ${canvas.height}`}
         onClick={handleCanvasClick}
-        style={{ background: canvas.background }}
       >
+        <defs>
+          {canvas.backgroundType === 'gradient' && (
+            <linearGradient id="background-gradient" gradientTransform={`rotate(${canvas.gradient.angle}, 0.5, 0.5)`}>
+              <stop offset="0%" stopColor={canvas.gradient.color1} />
+              <stop offset="100%" stopColor={canvas.gradient.color2} />
+            </linearGradient>
+          )}
+          {canvas.pattern.type === 'grid' && (
+            <pattern id="pattern-grid" patternUnits="userSpaceOnUse" width={20 * canvas.pattern.scale} height={20 * canvas.pattern.scale}>
+                <path d={`M ${20 * canvas.pattern.scale} 0 L 0 0 0 ${20 * canvas.pattern.scale}`} fill="none" stroke={canvas.pattern.color} strokeWidth="1"/>
+            </pattern>
+          )}
+          {canvas.pattern.type === 'graph' && (
+            <pattern id="pattern-graph" patternUnits="userSpaceOnUse" width={10 * canvas.pattern.scale} height={10 * canvas.pattern.scale}>
+                <path d={`M ${10 * canvas.pattern.scale} 0 L 0 0 0 ${10 * canvas.pattern.scale}`} fill="none" stroke={canvas.pattern.color} strokeWidth="0.5"/>
+            </pattern>
+          )}
+          {canvas.pattern.type === 'dots' && (
+             <pattern id="pattern-dots" patternUnits="userSpaceOnUse" width={10 * canvas.pattern.scale} height={10 * canvas.pattern.scale}>
+                <circle cx={5 * canvas.pattern.scale} cy={5 * canvas.pattern.scale} r={1 * canvas.pattern.scale} fill={canvas.pattern.color} />
+            </pattern>
+          )}
+          {canvas.noise.enabled && (
+            <filter id="noise-filter">
+                <feTurbulence 
+                    type="fractalNoise" 
+                    baseFrequency="0.65" 
+                    numOctaves="1" 
+                    stitchTiles="stitch"
+                />
+            </filter>
+          )}
+        </defs>
+
+        <rect
+          width="100%"
+          height="100%"
+          fill={canvas.backgroundType === 'solid' ? canvas.background : 'url(#background-gradient)'}
+        />
+
+        {canvas.pattern.type !== 'none' && (
+          <rect
+            width="100%"
+            height="100%"
+            fill={`url(#pattern-${canvas.pattern.type})`}
+            opacity={canvas.pattern.opacity}
+            style={{ filter: `blur(${canvas.pattern.blur}px)` }}
+          />
+        )}
+        
+        {canvas.noise.enabled && (
+          <rect 
+            width="100%" 
+            height="100%" 
+            filter="url(#noise-filter)" 
+            opacity={canvas.noise.opacity} 
+            style={{ mixBlendMode: 'soft-light' }} 
+          />
+        )}
+
         {elements.map((element) => (
           <ElementInteraction key={element.id} element={element}>
             {/* The actual rendering is handled inside ElementInteraction for simplicity */}
