@@ -173,23 +173,26 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
         const iconData = icons[iconEl.name as keyof typeof icons];
         if (!iconData || !Array.isArray(iconData)) return null;
 
-        const [, , children] = iconData;
-        if (!children || !Array.isArray(children)) return null;
+        const [tagName, svgAttrs, children] = iconData;
+        if (tagName !== 'svg' || !children || !Array.isArray(children)) return null;
 
         const scaleX = element.width / 24;
         const scaleY = element.height / 24;
 
+        const groupAttrs = { ...svgAttrs };
+        delete groupAttrs.width;
+        delete groupAttrs.height;
+        delete groupAttrs.viewBox;
+        delete groupAttrs.xmlns;
+
+        groupAttrs.stroke = iconEl.color;
+        
         return (
           <g
             transform={`scale(${scaleX} ${scaleY})`}
-            stroke={iconEl.color}
-            color={iconEl.color}
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            {...groupAttrs}
           >
-            {children.map(([tag, attrs], i) => React.createElement(tag, { key: i, ...attrs }))}
+            {children.map(([tag, attrs]: [string, any], i: number) => React.createElement(tag, { key: i, ...attrs }))}
           </g>
         );
       }
