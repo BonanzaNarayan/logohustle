@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { CanvasElement, TextElement, IconElement, ShapeElement, ImageElement } from "@/lib/types";
 import { useEditor } from "@/hooks/useEditor";
 import { icons } from "lucide-react";
+import { LucideIcon } from "@/lib/lucide-icons";
 
 export const ElementInteraction = React.memo(function ElementInteraction({ element }: { element: CanvasElement }) {
   const { state, dispatch } = useEditor();
@@ -170,21 +171,14 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
         );
       case 'icon': {
         const iconEl = element as IconElement;
-        const IconComponent = icons[iconEl.name as keyof typeof icons];
-
-        if (!IconComponent) {
-          return null;
-        }
-
         return (
-            <g>
-                <IconComponent
-                    color={iconEl.color}
-                    width={element.width}
-                    height={element.height}
-                    strokeWidth="2"
-                />
-            </g>
+          <LucideIcon
+            name={iconEl.name}
+            color={iconEl.color}
+            width={element.width}
+            height={element.height}
+            strokeWidth="2"
+          />
         );
       }
       case 'shape': {
@@ -239,14 +233,15 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
   return (
     <g
       transform={`translate(${element.x}, ${element.y})`}
-      opacity={element.opacity}
     >
       <g 
         transform={`rotate(${element.rotation} ${element.width / 2} ${element.height / 2})`}
         onMouseDown={(e) => handleMouseDown(e, 'drag')}
         style={{ cursor: interaction === 'drag' ? 'grabbing' : 'grab' }}
       >
-        {renderContent()}
+        <g opacity={element.opacity}>
+            {renderContent()}
+        </g>
         
         {/* Transparent rect to ensure draggable area */}
         <rect x={0} y={0} width={element.width} height={element.height} fill="transparent" />
