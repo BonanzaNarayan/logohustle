@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { availableIcons, LucideIcon } from "@/lib/lucide-icons";
+import { icons } from "lucide-react";
+import { LucideIcon } from "@/lib/lucide-icons";
 import { Input } from "../ui/input";
 import { useEditor } from "@/hooks/useEditor";
 import { Search } from "lucide-react";
+
+const availableIcons = Object.keys(icons);
 
 export function IconPanel() {
   const [searchTerm, setSearchTerm] = useState("");

@@ -83,7 +83,9 @@ function editorReducer(state: EditorState, action: Action): EditorState {
             color: "#344054",
             strokeColor: 'transparent',
             strokeWidth: 0,
-            ...data
+            ...data,
+            ...(data?.shape === 'circle' && { width: 100, height: 100 }),
+            ...(data?.shape === 'triangle' && { height: 87 }),
           } as CanvasElement;
           break;
         case 'image':
