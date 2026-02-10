@@ -54,6 +54,7 @@ export function ElementInteraction({ element }: { element: CanvasElement }) {
   const interactionRef = useRef<{
     startPoint: { x: number; y: number };
     startElement: CanvasElement;
+    svg: SVGSVGElement;
     resizeDirection?: string;
     startAngle?: number;
     center?: {x: number; y: number};
@@ -61,29 +62,33 @@ export function ElementInteraction({ element }: { element: CanvasElement }) {
   
   const isSelected = state.selectedElement?.id === element.id;
 
-  const getSVGPoint = (e: MouseEvent | React.MouseEvent) => {
-    const svg = e.currentTarget.ownerSVGElement;
-    if (svg) {
-        let point = svg.createSVGPoint();
-        point.x = e.clientX;
-        point.y = e.clientY;
-        point = point.matrixTransform(svg.getScreenCTM()?.inverse());
-        return point;
+  const getSVGPoint = (e: MouseEvent | React.MouseEvent, svg: SVGSVGElement) => {
+    const point = svg.createSVGPoint();
+    point.x = e.clientX;
+    point.y = e.clientY;
+    const ctm = svg.getScreenCTM();
+    if (ctm) {
+        return point.matrixTransform(ctm.inverse());
     }
-    return { x: 0, y: 0 };
+    return point;
   }
 
-  const handleMouseDown = (e: React.MouseEvent<SVGElement>, interactionType: 'drag' | 'resize' | 'rotate', direction?: string) => {
+  const handleMouseDown = (e: React.MouseEvent, interactionType: 'drag' | 'resize' | 'rotate', direction?: string) => {
     e.stopPropagation();
     if(element.id !== state.selectedElement?.id) {
       dispatch({ type: 'SELECT_ELEMENT', payload: { id: element.id } });
     }
     setInteraction(interactionType);
-    const startPoint = getSVGPoint(e);
+    
+    const svg = (e.currentTarget as Element).ownerSVGElement;
+    if (!svg) return;
+
+    const startPoint = getSVGPoint(e, svg);
     
     interactionRef.current = {
       startPoint,
       startElement: { ...element },
+      svg,
     }
     
     if (interactionType === 'resize') {
@@ -103,8 +108,8 @@ export function ElementInteraction({ element }: { element: CanvasElement }) {
     const handleMouseMove = (e: MouseEvent) => {
       if (!interaction || !interactionRef.current) return;
 
-      const currentPoint = getSVGPoint(e as any);
-      const { startPoint, startElement, resizeDirection, center, startAngle } = interactionRef.current;
+      const { svg, startPoint, startElement, resizeDirection, center, startAngle } = interactionRef.current;
+      const currentPoint = getSVGPoint(e, svg);
       const dx = currentPoint.x - startPoint.x;
       const dy = currentPoint.y - startPoint.y;
 
@@ -191,16 +196,21 @@ export function ElementInteraction({ element }: { element: CanvasElement }) {
   return (
     <g
       transform={`translate(${element.x}, ${element.y})`}
-      onMouseDown={(e) => handleMouseDown(e, 'drag')}
-      style={{ cursor: interaction === 'drag' ? 'grabbing' : 'grab' }}
       opacity={element.opacity}
     >
-      <g transform={`rotate(${element.rotation} ${element.width / 2} ${element.height / 2})`}>
+      <g 
+        transform={`rotate(${element.rotation} ${element.width / 2} ${element.height / 2})`}
+        onMouseDown={(e) => handleMouseDown(e, 'drag')}
+        style={{ cursor: interaction === 'drag' ? 'grabbing' : 'grab' }}
+      >
         <foreignObject x={0} y={0} width={element.width} height={element.height} style={{pointerEvents: 'none', overflow: 'visible'}}>
           <div style={{width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
               {renderElement(element)}
           </div>
         </foreignObject>
+        
+        {/* Transparent rect to ensure draggable area */}
+        <rect x={0} y={0} width={element.width} height={element.height} fill="transparent" />
 
         {isSelected && (
           <>

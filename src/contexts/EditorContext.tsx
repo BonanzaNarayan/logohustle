@@ -20,7 +20,8 @@ export type Action =
   | { type: "ADD_ELEMENT"; payload: { type: CanvasElement['type']; data?: Partial<CanvasElement> } }
   | { type: "UPDATE_ELEMENT"; payload: Partial<CanvasElement> & { id: string } }
   | { type: "DELETE_ELEMENT"; payload: { id: string } }
-  | { type: "SELECT_ELEMENT"; payload: { id: string | null } };
+  | { type: "SELECT_ELEMENT"; payload: { id: string | null } }
+  | { type: "UPDATE_CANVAS"; payload: Partial<EditorState['canvas']> };
 
 const initialState: EditorState = {
   canvas: {
@@ -130,6 +131,12 @@ function editorReducer(state: EditorState, action: Action): EditorState {
         ...state,
         selectedElement: selected,
       };
+    }
+    case "UPDATE_CANVAS": {
+        return {
+            ...state,
+            canvas: { ...state.canvas, ...action.payload },
+        };
     }
     default:
       return state;

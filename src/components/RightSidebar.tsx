@@ -7,6 +7,7 @@ import { Trash } from "lucide-react";
 import { TransformProperties } from "./properties/TransformProperties";
 import { StyleProperties } from "./properties/StyleProperties";
 import { TextProperties } from "./properties/TextProperties";
+import { CanvasBackgroundProperties } from "./properties/CanvasBackgroundProperties";
 
 export function RightSidebar() {
   const { state, dispatch } = useEditor();
@@ -36,9 +37,7 @@ export function RightSidebar() {
             </Button>
           </div>
         ) : (
-          <div className="p-4 text-center text-muted-foreground h-full flex items-center justify-center">
-            <p>Select an element to see its properties.</p>
-          </div>
+          <CanvasBackgroundProperties />
         )}
       </ScrollArea>
     </aside>
