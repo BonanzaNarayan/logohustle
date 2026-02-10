@@ -179,16 +179,23 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
         const scaleX = element.width / 24;
         const scaleY = element.height / 24;
         
+        // These are attributes we don't need on the <g> tag.
+        const { 
+            width, 
+            height, 
+            xmlns, 
+            viewBox,
+            ...restSvgAttrs // This captures fill, stroke, strokeWidth, etc.
+        } = svgAttrs as any;
+
         return (
           <g
             transform={`scale(${scaleX} ${scaleY})`}
-            stroke={iconEl.color}
-            fill="none"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            {...restSvgAttrs}
+            stroke={iconEl.color} // Override the 'currentColor' from lucide with our element's color.
           >
             {children.map(([tag, attrs]: [string, any], i: number) => {
+                // The children elements from lucide have no styling, they inherit from the parent.
                 return React.createElement(tag, { key: i, ...attrs });
             })}
           </g>
