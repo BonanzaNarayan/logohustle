@@ -184,15 +184,14 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
         delete groupAttrs.height;
         delete groupAttrs.viewBox;
         delete groupAttrs.xmlns;
-
-        groupAttrs.stroke = iconEl.color;
+        delete groupAttrs.stroke;
         
         return (
           <g
             transform={`scale(${scaleX} ${scaleY})`}
             {...groupAttrs}
           >
-            {children.map(([tag, attrs]: [string, any], i: number) => React.createElement(tag, { key: i, ...attrs }))}
+            {children.map(([tag, attrs]: [string, any], i: number) => React.createElement(tag, { key: i, ...attrs, stroke: iconEl.color }))}
           </g>
         );
       }
