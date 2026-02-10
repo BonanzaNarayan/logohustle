@@ -16,17 +16,14 @@ export function Canvas() {
   return (
     <div
       className="shadow-lg rounded-lg overflow-hidden"
-      style={{
-        width: canvas.width,
-        height: canvas.height,
-        backgroundColor: canvas.background,
-      }}
     >
       <svg
+        id="logo-canvas"
         width={canvas.width}
         height={canvas.height}
         viewBox={`0 0 ${canvas.width} ${canvas.height}`}
         onClick={handleCanvasClick}
+        style={{ background: canvas.background }}
       >
         {elements.map((element) => (
           <ElementInteraction key={element.id} element={element}>

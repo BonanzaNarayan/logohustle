@@ -5,49 +5,6 @@ import { CanvasElement, TextElement, IconElement, ShapeElement, ImageElement } f
 import { useEditor } from "@/hooks/useEditor";
 import { LucideIcon } from "@/lib/lucide-icons";
 
-const renderElement = (element: CanvasElement) => {
-    switch (element.type) {
-      case 'text':
-        const textEl = element as TextElement;
-        return (
-          <text
-            x="50%"
-            y="50%"
-            dominantBaseline="central"
-            textAnchor={textEl.align === 'center' ? 'middle' : (textEl.align === 'left' ? 'start' : 'end')}
-            fontFamily={textEl.fontFamily}
-            fontSize={textEl.fontSize}
-            fontWeight={textEl.fontWeight}
-            fill={textEl.color}
-            style={{ userSelect: 'none', pointerEvents: 'none' }}
-          >
-            {textEl.content}
-          </text>
-        );
-      case 'icon':
-        const iconEl = element as IconElement;
-        return <LucideIcon name={iconEl.name} color={iconEl.color} size="100%" />;
-      case 'shape':
-        const shapeEl = element as ShapeElement;
-        if (shapeEl.shape === 'rectangle') {
-            return <rect width="100%" height="100%" fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
-        }
-        if (shapeEl.shape === 'circle') {
-            return <circle cx="50%" cy="50%" r="50%" fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
-        }
-        if (shapeEl.shape === 'triangle') {
-            return <polygon points={`${shapeEl.width / 2},0 0,${shapeEl.height} ${shapeEl.width},${shapeEl.height}`} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
-        }
-        return null;
-    case 'image':
-        const imageEl = element as ImageElement;
-        return <image href={imageEl.src} width="100%" height="100%" />;
-      default:
-        return null;
-    }
-  };
-
-
 export function ElementInteraction({ element }: { element: CanvasElement }) {
   const { state, dispatch } = useEditor();
   const [interaction, setInteraction] = useState<'drag' | 'resize' | 'rotate' | null>(null);
@@ -191,6 +148,54 @@ export function ElementInteraction({ element }: { element: CanvasElement }) {
       { dir: 's', x: element.width/2 - handleSize/2, y: element.height - handleSize/2 },
       { dir: 'se', x: element.width - handleSize/2, y: element.height - handleSize/2 },
   ]
+  
+  const renderContent = () => {
+    switch (element.type) {
+      case 'text':
+        const textEl = element as TextElement;
+        return (
+          <text
+            x={textEl.width / 2}
+            y={textEl.height / 2}
+            dominantBaseline="central"
+            textAnchor={textEl.align}
+            fontFamily={textEl.fontFamily}
+            fontSize={textEl.fontSize}
+            fontWeight={textEl.fontWeight}
+            fill={textEl.color}
+            style={{ userSelect: 'none' }}
+          >
+            {textEl.content}
+          </text>
+        );
+      case 'icon':
+        const iconEl = element as IconElement;
+        return (
+          <foreignObject x="0" y="0" width={element.width} height={element.height}>
+              <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
+                  <LucideIcon name={iconEl.name} color={iconEl.color} size="100%" />
+              </div>
+          </foreignObject>
+        );
+      case 'shape':
+        const shapeEl = element as ShapeElement;
+        if (shapeEl.shape === 'rectangle') {
+            return <rect x="0" y="0" width={shapeEl.width} height={shapeEl.height} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
+        }
+        if (shapeEl.shape === 'circle') {
+            return <circle cx={shapeEl.width / 2} cy={shapeEl.height / 2} r={Math.min(shapeEl.width, shapeEl.height) / 2} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
+        }
+        if (shapeEl.shape === 'triangle') {
+            return <polygon points={`${shapeEl.width / 2},0 0,${shapeEl.height} ${shapeEl.width},${shapeEl.height}`} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
+        }
+        return null;
+    case 'image':
+        const imageEl = element as ImageElement;
+        return <image href={imageEl.src} x="0" y="0" width={element.width} height={element.height} />;
+      default:
+        return null;
+    }
+  };
 
 
   return (
@@ -203,17 +208,13 @@ export function ElementInteraction({ element }: { element: CanvasElement }) {
         onMouseDown={(e) => handleMouseDown(e, 'drag')}
         style={{ cursor: interaction === 'drag' ? 'grabbing' : 'grab' }}
       >
-        <foreignObject x={0} y={0} width={element.width} height={element.height} style={{pointerEvents: 'none', overflow: 'visible'}}>
-          <div style={{width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-              {renderElement(element)}
-          </div>
-        </foreignObject>
+        {renderContent()}
         
         {/* Transparent rect to ensure draggable area */}
         <rect x={0} y={0} width={element.width} height={element.height} fill="transparent" />
 
         {isSelected && (
-          <>
+          <g data-interaction-handles="true">
             <rect
               x={-2}
               y={-2}
@@ -250,7 +251,7 @@ export function ElementInteraction({ element }: { element: CanvasElement }) {
                     style={{ cursor: 'crosshair' }}
                 />
             </g>
-          </>
+          </g>
         )}
       </g>
     </g>

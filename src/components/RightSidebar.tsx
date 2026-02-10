@@ -7,6 +7,7 @@ import { Trash } from "lucide-react";
 import { TransformProperties } from "./properties/TransformProperties";
 import { StyleProperties } from "./properties/StyleProperties";
 import { TextProperties } from "./properties/TextProperties";
+import { ShapeProperties } from "./properties/ShapeProperties";
 import { CanvasBackgroundProperties } from "./properties/CanvasBackgroundProperties";
 
 export function RightSidebar() {
@@ -30,6 +31,7 @@ export function RightSidebar() {
             <TransformProperties />
             <StyleProperties />
             {selectedElement.type === 'text' && <TextProperties />}
+            {selectedElement.type === 'shape' && <ShapeProperties />}
             
             <Button variant="destructive" className="w-full" onClick={handleDelete}>
               <Trash className="mr-2 h-4 w-4" />

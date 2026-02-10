@@ -22,7 +22,7 @@ export type TextElement = BaseElement & {
   fontSize: number;
   fontWeight: number;
   color: string;
-  align: 'left' | 'center' | 'right';
+  align: 'start' | 'middle' | 'end';
 };
 
 export type IconElement = BaseElement & {

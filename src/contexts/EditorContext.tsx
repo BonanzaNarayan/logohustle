@@ -61,7 +61,7 @@ function editorReducer(state: EditorState, action: Action): EditorState {
             fontSize: 48,
             fontWeight: 400,
             color: "#000000",
-            align: 'center',
+            align: 'middle',
             width: 250,
             height: 60,
              ...data
