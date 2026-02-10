@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { CanvasElement, TextElement, IconElement, ShapeElement, ImageElement } from "@/lib/types";
 import { useEditor } from "@/hooks/useEditor";
-import { LucideIcon } from "@/lib/lucide-icons";
+import { icons } from "lucide-react";
 
 export function ElementInteraction({ element }: { element: CanvasElement }) {
   const { state, dispatch } = useEditor();
@@ -95,16 +95,16 @@ export function ElementInteraction({ element }: { element: CanvasElement }) {
         }
         if (resizeDirection.includes('w')) {
             width -= rotatedDx;
-            x += dx - (rotatedDx * cos - 0 * sin);
-            y += dy - (rotatedDx * sin + 0 * cos);
+            x += rotatedDx * cos;
+            y += rotatedDx * sin;
         }
         if (resizeDirection.includes('s')) {
             height += rotatedDy;
         }
         if (resizeDirection.includes('n')) {
             height -= rotatedDy;
-            x += dx - (0 * cos - rotatedDy * sin);
-            y += dy - (0 * sin + rotatedDy * cos);
+            x += rotatedDy * sin;
+            y -= rotatedDy * cos;
         }
 
         if (width < 10) width = 10;
@@ -168,15 +168,28 @@ export function ElementInteraction({ element }: { element: CanvasElement }) {
             {textEl.content}
           </text>
         );
-      case 'icon':
+      case 'icon': {
         const iconEl = element as IconElement;
+        const iconData = icons[iconEl.name as keyof typeof icons];
+        if (!iconData) return null;
+
+        const [, , children] = iconData;
+        const scaleX = element.width / 24;
+        const scaleY = element.height / 24;
+
         return (
-          <foreignObject x="0" y="0" width={element.width} height={element.height}>
-              <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
-                  <LucideIcon name={iconEl.name} color={iconEl.color} size="100%" />
-              </div>
-          </foreignObject>
+          <g
+            transform={`scale(${scaleX} ${scaleY})`}
+            stroke={iconEl.color}
+            strokeWidth="2"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            {children.map(([tag, attrs], i) => React.createElement(tag, { key: i, ...attrs }))}
+          </g>
         );
+      }
       case 'shape':
         const shapeEl = element as ShapeElement;
         if (shapeEl.shape === 'rectangle') {

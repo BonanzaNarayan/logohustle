@@ -8,9 +8,9 @@ export function Canvas() {
   const { canvas, elements } = state;
 
   const handleCanvasClick = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (e.target === e.currentTarget) {
-      dispatch({ type: 'SELECT_ELEMENT', payload: { id: null } });
-    }
+    // If an element is clicked, propagation is stopped in ElementInteraction.
+    // So this will only fire for clicks on the canvas background.
+    dispatch({ type: 'SELECT_ELEMENT', payload: { id: null } });
   };
 
   return (
