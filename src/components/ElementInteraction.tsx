@@ -170,46 +170,21 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
         );
       case 'icon': {
         const iconEl = element as IconElement;
-        const iconData = icons[iconEl.name as keyof typeof icons];
+        const IconComponent = icons[iconEl.name as keyof typeof icons];
 
-        if (!iconData || !Array.isArray(iconData)) return null;
-
-        const [tagName, svgAttrs, children] = iconData;
-        if (tagName !== 'svg' || !children || !Array.isArray(children)) return null;
-
-        const scaleX = element.width / 24;
-        const scaleY = element.height / 24;
-        
-        const kebabToCamel = (str: string) => str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-
-        const processAttrs = (attrs: Record<string, any>) => {
-          return Object.entries(attrs).reduce((acc, [key, value]) => {
-            acc[kebabToCamel(key)] = value;
-            return acc;
-          }, {} as Record<string, any>);
-        };
-
-        const { 
-            width, 
-            height, 
-            xmlns, 
-            viewBox,
-            ...restSvgAttrs
-        } = svgAttrs as any;
-
-        const processedSvgAttrs = processAttrs(restSvgAttrs);
+        if (!IconComponent) {
+          return null;
+        }
 
         return (
-          <g
-            transform={`scale(${scaleX} ${scaleY})`}
-            {...processedSvgAttrs}
-            stroke={iconEl.color}
-          >
-            {children.map(([childTag, childAttrs]: [string, any], i: number) => {
-              const processedChildAttrs = processAttrs(childAttrs);
-              return React.createElement(childTag, { key: i, ...processedChildAttrs });
-            })}
-          </g>
+            <g>
+                <IconComponent
+                    color={iconEl.color}
+                    width={element.width}
+                    height={element.height}
+                    strokeWidth="2"
+                />
+            </g>
         );
       }
       case 'shape':
