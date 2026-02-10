@@ -8,13 +8,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Download, FileJson, Image as ImageIcon } from "lucide-react";
+import { Download, FileJson, Image as ImageIcon, Undo2, Redo2, Trash2 } from "lucide-react";
 import { useEditor } from "@/hooks/useEditor";
 import { downloadFile } from "@/lib/download";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export function Toolbar() {
-  const { state } = useEditor();
+  const { state, dispatch, canUndo, canRedo } = useEditor();
   const { toast } = useToast();
 
   const getSvgString = () => {
@@ -84,6 +95,10 @@ export function Toolbar() {
     }
     img.src = url;
   };
+
+  const handleClearCanvas = () => {
+    dispatch({ type: 'CLEAR_CANVAS' });
+  };
   
   return (
     <header className="h-16 flex items-center justify-between px-4 border-b border-border bg-card">
@@ -92,6 +107,33 @@ export function Toolbar() {
         <h1 className="text-lg font-semibold text-foreground">LogoForge</h1>
       </div>
       <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" onClick={() => dispatch({type: 'UNDO'})} disabled={!canUndo} aria-label="Undo">
+            <Undo2 />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={() => dispatch({type: 'REDO'})} disabled={!canRedo} aria-label="Redo">
+            <Redo2 />
+        </Button>
+
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="Clear Canvas">
+              <Trash2 className="text-destructive" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will clear the entire canvas. This action can be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={handleClearCanvas}>Clear Canvas</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button>

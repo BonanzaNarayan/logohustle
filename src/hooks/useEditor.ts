@@ -1,6 +1,6 @@
 "use client";
 
-import { EditorContext } from "@/contexts/EditorContext";
+import { EditorContext, EditorState } from "@/contexts/EditorContext";
 import { useContext } from "react";
 
 export const useEditor = () => {
@@ -8,5 +8,16 @@ export const useEditor = () => {
   if (!context) {
     throw new Error("useEditor must be used within an EditorProvider");
   }
-  return context;
+  
+  const { state, dispatch } = context;
+  const { history, historyIndex, clipboard } = state;
+  const present = history[historyIndex];
+
+  return {
+    state: present,
+    dispatch,
+    clipboard,
+    canUndo: historyIndex > 0,
+    canRedo: historyIndex < history.length - 1,
+  };
 };

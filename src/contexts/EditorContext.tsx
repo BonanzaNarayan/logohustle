@@ -1,11 +1,12 @@
 "use client";
 
 import { createContext, useReducer, useEffect, ReactNode, Dispatch, useState } from "react";
-import { CanvasElement } from "@/lib/types";
+import { CanvasElement, IconElement, ShapeElement, TextElement, ImageElement } from "@/lib/types";
 import { nanoid } from "nanoid";
 import { Loader2 } from "lucide-react";
 
-export type EditorState = {
+// This is the state that gets tracked in the undo/redo history
+export type EditorCoreState = {
   canvas: {
     width: number;
     height: number;
@@ -30,204 +31,242 @@ export type EditorState = {
   };
   elements: CanvasElement[];
   selectedElement: CanvasElement | null;
+};
+
+// This is the full state of the editor, including history
+export type EditorState = {
+  history: EditorCoreState[];
+  historyIndex: number;
   clipboard: CanvasElement | null;
 };
 
 export type Action =
-  | { type: "LOAD_STATE"; payload: EditorState }
+  | { type: "LOAD_STATE"; payload: Partial<EditorCoreState> }
   | { type: "ADD_ELEMENT"; payload: { type: CanvasElement['type']; data?: Partial<CanvasElement> } }
   | { type: "UPDATE_ELEMENT"; payload: Partial<CanvasElement> & { id: string } }
   | { type: "DELETE_ELEMENT"; payload: { id: string } }
   | { type: "SELECT_ELEMENT"; payload: { id: string | null } }
-  | { type: "UPDATE_CANVAS"; payload: Partial<EditorState['canvas']> }
+  | { type: "UPDATE_CANVAS"; payload: Partial<EditorCoreState['canvas']> }
   | { type: 'COPY_ELEMENT' }
   | { type: 'PASTE_ELEMENT' }
-  | { type: 'DUPLICATE_ELEMENT' };
+  | { type: 'DUPLICATE_ELEMENT' }
+  | { type: 'UNDO' }
+  | { type: 'REDO' }
+  | { type: 'CLEAR_CANVAS' };
 
-const initialState: EditorState = {
-  canvas: {
-    width: 512,
-    height: 512,
-    backgroundType: 'solid',
-    background: '#ffffff',
-    gradient: {
-      color1: '#ffffff',
-      color2: '#d4d4d8',
-      angle: 90,
-    },
-    pattern: {
-      type: 'none',
-      color: '#000000',
-      opacity: 0.1,
-      scale: 1,
-      blur: 0,
-    },
-    noise: {
-      enabled: false,
-      opacity: 0.1,
-    },
+const initialCanvasState = {
+  width: 512,
+  height: 512,
+  backgroundType: 'solid',
+  background: '#ffffff',
+  gradient: {
+    color1: '#ffffff',
+    color2: '#d4d4d8',
+    angle: 90,
   },
+  pattern: {
+    type: 'none',
+    color: '#000000',
+    opacity: 0.1,
+    scale: 1,
+    blur: 0,
+  },
+  noise: {
+    enabled: false,
+    opacity: 0.1,
+  },
+};
+
+const initialCoreState: EditorCoreState = {
+  canvas: initialCanvasState,
   elements: [],
   selectedElement: null,
+};
+
+const initialState: EditorState = {
+  history: [initialCoreState],
+  historyIndex: 0,
   clipboard: null,
 };
 
 function editorReducer(state: EditorState, action: Action): EditorState {
+  const { history, historyIndex, clipboard } = state;
+  const present = history[historyIndex];
+
   switch (action.type) {
     case "LOAD_STATE": {
       const loadedState = action.payload;
       const mergedCanvas = {
-          ...initialState.canvas,
+          ...initialCanvasState,
           ...(loadedState.canvas || {}),
-          gradient: { ...initialState.canvas.gradient, ...(loadedState.canvas?.gradient || {}) },
-          pattern: { ...initialState.canvas.pattern, ...(loadedState.canvas?.pattern || {}) },
-          noise: { ...initialState.canvas.noise, ...(loadedState.canvas?.noise || {}) },
+          gradient: { ...initialCanvasState.gradient, ...(loadedState.canvas?.gradient || {}) },
+          pattern: { ...initialCanvasState.pattern, ...(loadedState.canvas?.pattern || {}) },
+          noise: { ...initialCanvasState.noise, ...(loadedState.canvas?.noise || {}) },
       };
+      const newCoreState: EditorCoreState = {
+          ...initialCoreState,
+          canvas: mergedCanvas,
+          elements: loadedState.elements || [],
+      }
       return {
           ...initialState,
-          ...loadedState,
-          canvas: mergedCanvas,
-          clipboard: null,
+          history: [newCoreState],
       };
     }
-    case "ADD_ELEMENT": {
-      const { type, data } = action.payload;
-      const newElementDefaults = {
-        id: nanoid(),
-        x: state.canvas.width / 2 - 50,
-        y: state.canvas.height / 2 - 50,
-        width: 100,
-        height: 100,
-        rotation: 0,
-        opacity: 1,
+
+    case 'UNDO':
+      return {
+        ...state,
+        historyIndex: Math.max(0, historyIndex - 1),
       };
 
-      let newElement: CanvasElement;
+    case 'REDO':
+      return {
+        ...state,
+        historyIndex: Math.min(history.length - 1, historyIndex + 1),
+      };
 
-      switch(type) {
-        case 'text':
-          newElement = {
-            ...newElementDefaults,
-            type: 'text',
-            content: "Hello World",
-            fontFamily: "Inter",
-            fontSize: 48,
-            fontWeight: 400,
-            color: "#000000",
-            align: 'middle',
-            width: 250,
-            height: 60,
-             ...data
-          } as CanvasElement;
+    case 'SELECT_ELEMENT': {
+      const selected = present.elements.find((el) => el.id === action.payload.id) || null;
+      if (present.selectedElement?.id === selected?.id) return state;
+
+      const newPresent = { ...present, selectedElement: selected };
+      const newHistory = [...history];
+      newHistory[historyIndex] = newPresent;
+      return {
+        ...state,
+        history: newHistory,
+      };
+    }
+
+    case 'COPY_ELEMENT': {
+      if (!present.selectedElement) return state;
+      return { ...state, clipboard: { ...present.selectedElement } };
+    }
+
+    default: {
+      // All other actions create a new history entry
+      let newPresent = { ...present };
+
+      switch(action.type) {
+        case "ADD_ELEMENT": {
+          const { type, data } = action.payload;
+          const newElementDefaults = {
+            id: nanoid(),
+            x: newPresent.canvas.width / 2 - 50,
+            y: newPresent.canvas.height / 2 - 50,
+            width: 100,
+            height: 100,
+            rotation: 0,
+            opacity: 1,
+          };
+
+          let newElement: CanvasElement;
+
+          switch(type) {
+            case 'text':
+              newElement = { ...newElementDefaults, type: 'text', content: "Hello World", fontFamily: "Inter", fontSize: 48, fontWeight: 400, color: "#000000", align: 'middle', width: 250, height: 60, ...data } as TextElement;
+              break;
+            case 'icon':
+              newElement = { ...newElementDefaults, type: 'icon', name: "Smile", color: "#000000", ...data } as IconElement;
+              break;
+            case 'shape':
+              newElement = { ...newElementDefaults, type: 'shape', shape: "rectangle", color: "transparent", strokeColor: "#344054", strokeWidth: 2, ...data, ...(data?.shape === 'circle' && { width: 100, height: 100 }), ...(data?.shape === 'triangle' && { height: 87 }) } as ShapeElement;
+              break;
+            case 'image':
+              newElement = { ...newElementDefaults, type: 'image', src: "", ...data } as ImageElement;
+              break;
+            default:
+              throw new Error("Invalid element type");
+          }
+          
+          newPresent = {
+            ...newPresent,
+            elements: [...newPresent.elements, newElement],
+            selectedElement: newElement,
+          };
           break;
-        case 'icon':
-          newElement = {
-            ...newElementDefaults,
-            type: 'icon',
-            name: "Smile",
-            color: "#000000",
-            ...data
-          } as CanvasElement;
+        }
+        case "UPDATE_ELEMENT": {
+          const updatedElements = newPresent.elements.map((el) =>
+            el.id === action.payload.id ? { ...el, ...action.payload } : el
+          );
+          newPresent = {
+            ...newPresent,
+            elements: updatedElements,
+            selectedElement: newPresent.selectedElement && newPresent.selectedElement.id === action.payload.id ? { ...newPresent.selectedElement, ...action.payload } as CanvasElement : newPresent.selectedElement
+          };
           break;
-        case 'shape':
-           newElement = {
-            ...newElementDefaults,
-            type: 'shape',
-            shape: "rectangle",
-            color: "transparent",
-            strokeColor: "#344054",
-            strokeWidth: 2,
-            ...data,
-            ...(data?.shape === 'circle' && { width: 100, height: 100 }),
-            ...(data?.shape === 'triangle' && { height: 87 }),
-          } as CanvasElement;
+        }
+        case "DELETE_ELEMENT": {
+          const filteredElements = newPresent.elements.filter(el => el.id !== action.payload.id);
+          newPresent = {
+            ...newPresent,
+            elements: filteredElements,
+            selectedElement: newPresent.selectedElement && newPresent.selectedElement.id === action.payload.id ? null : newPresent.selectedElement
+          };
           break;
-        case 'image':
-           newElement = {
-            ...newElementDefaults,
-            type: 'image',
-            src: "",
-            ...data
-          } as CanvasElement;
-           break;
-        default:
-          throw new Error("Invalid element type");
+        }
+        case "UPDATE_CANVAS": {
+          newPresent = {
+            ...newPresent,
+            canvas: { ...newPresent.canvas, ...action.payload },
+          };
+          break;
+        }
+        case 'PASTE_ELEMENT': {
+          if (!clipboard) return state;
+          const newElement = {
+            ...clipboard,
+            id: nanoid(),
+            x: clipboard.x + 20,
+            y: clipboard.y + 20,
+          };
+          newPresent = {
+            ...newPresent,
+            elements: [...newPresent.elements, newElement],
+            selectedElement: newElement
+          };
+          break;
+        }
+        case 'DUPLICATE_ELEMENT': {
+          if (!present.selectedElement) return state;
+          const newElement = {
+            ...present.selectedElement,
+            id: nanoid(),
+            x: present.selectedElement.x + 20,
+            y: present.selectedElement.y + 20,
+          };
+          newPresent = {
+            ...newPresent,
+            elements: [...newPresent.elements, newElement],
+            selectedElement: newElement
+          };
+          break;
+        }
+        case 'CLEAR_CANVAS': {
+            newPresent = {
+                ...newPresent,
+                elements: [],
+                selectedElement: null,
+            };
+            break;
+        }
       }
+
+      if (newPresent === present) {
+        return state;
+      }
+      
+      const newHistory = history.slice(0, historyIndex + 1);
+      newHistory.push(newPresent);
       
       return {
         ...state,
-        elements: [...state.elements, newElement],
-        selectedElement: newElement,
+        history: newHistory,
+        historyIndex: newHistory.length - 1,
       };
     }
-    case "UPDATE_ELEMENT": {
-      const updatedElements = state.elements.map((el) =>
-        el.id === action.payload.id ? { ...el, ...action.payload } : el
-      );
-      return {
-        ...state,
-        elements: updatedElements,
-        selectedElement: state.selectedElement && state.selectedElement.id === action.payload.id ? { ...state.selectedElement, ...action.payload } as CanvasElement : state.selectedElement
-      };
-    }
-    case "DELETE_ELEMENT": {
-        const filteredElements = state.elements.filter(el => el.id !== action.payload.id);
-        return {
-            ...state,
-            elements: filteredElements,
-            selectedElement: state.selectedElement && state.selectedElement.id === action.payload.id ? null : state.selectedElement
-        };
-    }
-    case "SELECT_ELEMENT": {
-      const selected = state.elements.find((el) => el.id === action.payload.id) || null;
-      return {
-        ...state,
-        selectedElement: selected,
-      };
-    }
-    case "UPDATE_CANVAS": {
-        return {
-            ...state,
-            canvas: { ...state.canvas, ...action.payload },
-        };
-    }
-    case 'COPY_ELEMENT': {
-        if (!state.selectedElement) return state;
-        return {
-            ...state,
-            clipboard: { ...state.selectedElement }
-        };
-    }
-    case 'PASTE_ELEMENT': {
-        if (!state.clipboard) return state;
-        const newElement = {
-            ...state.clipboard,
-            id: nanoid(),
-            x: state.clipboard.x + 20,
-            y: state.clipboard.y + 20,
-        };
-        return {
-            ...state,
-            elements: [...state.elements, newElement],
-            selectedElement: newElement
-        };
-    }
-    case 'DUPLICATE_ELEMENT': {
-        if (!state.selectedElement) return state;
-        const newElement = {
-            ...state.selectedElement,
-            id: nanoid(),
-            x: state.selectedElement.x + 20,
-            y: state.selectedElement.y + 20,
-        };
-        return {
-            ...state,
-            elements: [...state.elements, newElement],
-            selectedElement: newElement
-        };
-    }
-    default:
-      return state;
   }
 }
 
@@ -255,7 +294,8 @@ export function EditorProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if(isLoaded) {
-      const stateToSave = { ...state, clipboard: null, selectedElement: null };
+      const presentState = state.history[state.historyIndex];
+      const stateToSave = { ...presentState, selectedElement: null };
       localStorage.setItem("logoForgeState", JSON.stringify(stateToSave));
     }
   }, [state, isLoaded]);
