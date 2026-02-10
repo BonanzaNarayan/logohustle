@@ -7,7 +7,7 @@ export function Canvas() {
   const { state, dispatch } = useEditor();
   const { canvas, elements } = state;
 
-  const handleCanvasClick = (e: React.MouseEvent<SVGSVGElement>) => {
+  const handleCanvasMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
     // If an element is clicked, propagation is stopped in ElementInteraction.
     // So this will only fire for clicks on the canvas background.
     dispatch({ type: 'SELECT_ELEMENT', payload: { id: null } });
@@ -22,7 +22,7 @@ export function Canvas() {
         width={canvas.width}
         height={canvas.height}
         viewBox={`0 0 ${canvas.width} ${canvas.height}`}
-        onClick={handleCanvasClick}
+        onMouseDown={handleCanvasMouseDown}
       >
         <defs>
           {canvas.backgroundType === 'gradient' && (

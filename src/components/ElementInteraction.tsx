@@ -5,7 +5,7 @@ import { CanvasElement, TextElement, IconElement, ShapeElement, ImageElement } f
 import { useEditor } from "@/hooks/useEditor";
 import { icons } from "lucide-react";
 
-export function ElementInteraction({ element }: { element: CanvasElement }) {
+export const ElementInteraction = React.memo(function ElementInteraction({ element }: { element: CanvasElement }) {
   const { state, dispatch } = useEditor();
   const [interaction, setInteraction] = useState<'drag' | 'resize' | 'rotate' | null>(null);
   const interactionRef = useRef<{
@@ -271,4 +271,4 @@ export function ElementInteraction({ element }: { element: CanvasElement }) {
       </g>
     </g>
   );
-}
+});
