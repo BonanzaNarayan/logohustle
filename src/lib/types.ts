@@ -31,7 +31,7 @@ export type IconElement = BaseElement & {
   color: string;
 };
 
-export type ShapeType = 'rectangle' | 'circle' | 'triangle';
+export type ShapeType = 'rectangle' | 'circle' | 'triangle' | 'star' | 'hexagon';
 export type ShapeElement = BaseElement & {
   type: 'shape';
   shape: ShapeType;

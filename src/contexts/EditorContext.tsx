@@ -171,7 +171,7 @@ function editorReducer(state: EditorState, action: Action): EditorState {
               newElement = { ...newElementDefaults, type: 'icon', name: "Smile", color: "#000000", ...data } as IconElement;
               break;
             case 'shape':
-              newElement = { ...newElementDefaults, type: 'shape', shape: "rectangle", color: "transparent", strokeColor: "#344054", strokeWidth: 2, ...data, ...(data?.shape === 'circle' && { width: 100, height: 100 }), ...(data?.shape === 'triangle' && { height: 87 }) } as ShapeElement;
+              newElement = { ...newElementDefaults, type: 'shape', shape: "rectangle", color: "transparent", strokeColor: "#344054", strokeWidth: 2, ...data, ...(data?.shape === 'circle' && { width: 100, height: 100 }), ...(data?.shape === 'triangle' && { height: 87 }), ...(data?.shape === 'star' && { width: 100, height: 100 }), ...(data?.shape === 'hexagon' && { height: 87 }) } as ShapeElement;
               break;
             case 'image':
               newElement = { ...newElementDefaults, type: 'image', src: "", ...data } as ImageElement;

@@ -187,18 +187,46 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
             </g>
         );
       }
-      case 'shape':
+      case 'shape': {
         const shapeEl = element as ShapeElement;
-        if (shapeEl.shape === 'rectangle') {
-            return <rect x="0" y="0" width={element.width} height={element.height} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
-        }
-        if (shapeEl.shape === 'circle') {
-            return <circle cx={element.width / 2} cy={element.height / 2} r={Math.min(element.width, element.height) / 2} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
-        }
-        if (shapeEl.shape === 'triangle') {
-            return <polygon points={`${element.width / 2},0 0,${element.height} ${element.width},${element.height}`} fill={shapeEl.color} stroke={shapeEl.strokeColor} strokeWidth={shapeEl.strokeWidth} />
+        const props = {
+            fill: shapeEl.color,
+            stroke: shapeEl.strokeColor,
+            strokeWidth: shapeEl.strokeWidth
+        };
+        switch (shapeEl.shape) {
+            case 'rectangle':
+                return <rect x="0" y="0" width={element.width} height={element.height} {...props} />
+            case 'circle':
+                return <circle cx={element.width / 2} cy={element.height / 2} r={Math.min(element.width, element.height) / 2} {...props} />
+            case 'triangle':
+                return <polygon points={`${element.width / 2},0 0,${element.height} ${element.width},${element.height}`} {...props} />
+            case 'star': {
+                const w = element.width;
+                const h = element.height;
+                const points = [
+                    w * 0.5, h * 0,
+                    w * 0.618, h * 0.363,
+                    w * 1, h * 0.363,
+                    w * 0.691, h * 0.593,
+                    w * 0.809, h * 0.951,
+                    w * 0.5, h * 0.73,
+                    w * 0.191, h * 0.951,
+                    w * 0.309, h * 0.593,
+                    w * 0, h * 0.363,
+                    w * 0.382, h * 0.363
+                ].join(' ');
+                return <polygon points={points} {...props} />;
+            }
+            case 'hexagon': {
+                const w = element.width;
+                const h = element.height;
+                const points = `${w/2},0 ${w},${h/4} ${w},${3*h/4} ${w/2},${h} 0,${3*h/4} 0,${h/4}`;
+                return <polygon points={points} {...props} />;
+            }
         }
         return null;
+      }
     case 'image':
         const imageEl = element as ImageElement;
         return <image href={imageEl.src} x="0" y="0" width={element.width} height={element.height} />;
