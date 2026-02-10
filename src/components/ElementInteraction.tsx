@@ -189,8 +189,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
             strokeLinejoin="round"
           >
             {children.map(([tag, attrs]: [string, any], i: number) => {
-                const { stroke, fill, ...restAttrs } = attrs;
-                return React.createElement(tag, { key: i, ...restAttrs });
+                return React.createElement(tag, { key: i, ...attrs });
             })}
           </g>
         );
