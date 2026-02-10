@@ -171,6 +171,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
       case 'icon': {
         const iconEl = element as IconElement;
         const iconData = icons[iconEl.name as keyof typeof icons];
+
         if (!iconData || !Array.isArray(iconData)) return null;
 
         const [tagName, svgAttrs, children] = iconData;
@@ -178,23 +179,31 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
 
         const scaleX = element.width / 24;
         const scaleY = element.height / 24;
-        
+
+        // The svgAttrs from lucide-react contains properties like
+        // width, height, viewBox, and importantly `stroke: "currentColor"`.
+        // We'll pass most of these down to the group element.
         const { 
             width, 
             height, 
             xmlns, 
             viewBox,
-            stroke, // We are overriding this on the children
             ...restSvgAttrs
         } = svgAttrs as any;
 
         return (
+          // This group scales the icon to the correct size.
+          // We spread the rest of the SVG attributes, which includes `fill`, `stroke-width`, etc.
+          // We then explicitly set the `stroke` to the element's color. This will be inherited
+          // by all children that have `stroke="currentColor"` (which is the default for lucide icons).
           <g
             transform={`scale(${scaleX} ${scaleY})`}
             {...restSvgAttrs}
+            stroke={iconEl.color}
           >
-            {children.map(([tag, attrs]: [string, any], i: number) => {
-                return React.createElement(tag, { key: i, ...attrs, stroke: iconEl.color });
+            {/* The children are the actual paths, lines, etc. We render them as-is. */}
+            {children.map(([childTag, childAttrs]: [string, any], i: number) => {
+              return React.createElement(childTag, { key: i, ...childAttrs });
             })}
           </g>
         );
