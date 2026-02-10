@@ -171,9 +171,11 @@ export function ElementInteraction({ element }: { element: CanvasElement }) {
       case 'icon': {
         const iconEl = element as IconElement;
         const iconData = icons[iconEl.name as keyof typeof icons];
-        if (!iconData) return null;
+        if (!iconData || !Array.isArray(iconData)) return null;
 
         const [, , children] = iconData;
+        if (!children || !Array.isArray(children)) return null;
+
         const scaleX = element.width / 24;
         const scaleY = element.height / 24;
 
