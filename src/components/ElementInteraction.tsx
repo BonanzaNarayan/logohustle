@@ -178,20 +178,20 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
 
         const scaleX = element.width / 24;
         const scaleY = element.height / 24;
-
-        const groupAttrs = { ...svgAttrs };
-        delete groupAttrs.width;
-        delete groupAttrs.height;
-        delete groupAttrs.viewBox;
-        delete groupAttrs.xmlns;
-        delete groupAttrs.stroke;
         
         return (
           <g
             transform={`scale(${scaleX} ${scaleY})`}
-            {...groupAttrs}
+            stroke={iconEl.color}
+            fill="none"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            {children.map(([tag, attrs]: [string, any], i: number) => React.createElement(tag, { key: i, ...attrs, stroke: iconEl.color }))}
+            {children.map(([tag, attrs]: [string, any], i: number) => {
+                const { stroke, fill, ...restAttrs } = attrs;
+                return React.createElement(tag, { key: i, ...restAttrs });
+            })}
           </g>
         );
       }
