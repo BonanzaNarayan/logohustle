@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'LogoForge',
+  title: 'LogoHustle',
   description: 'Create your perfect logo with an intuitive and powerful editor.',
 };
 
