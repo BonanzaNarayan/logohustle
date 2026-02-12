@@ -19,6 +19,17 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
   const { elements, canvas } = state;
   
   const [tempTransform, setTempTransform] = useState<TempTransform | null>(null);
+  const [isInteracting, setIsInteracting] = useState(false);
+
+  useEffect(() => {
+    // When interaction stops, if there's a temporary transform, dispatch the update.
+    if (!isInteracting && tempTransform) {
+      dispatch({ type: 'UPDATE_ELEMENT', payload: { id: element.id, ...tempTransform } });
+      // Clear the temporary transform after dispatching
+      setTempTransform(null);
+    }
+  }, [isInteracting, tempTransform, dispatch, element.id]);
+
 
   const interactionRef = useRef<{
     startPoint: { x: number; y: number };
@@ -52,6 +63,8 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
     if(element.id !== state.selectedElement?.id) {
       dispatch({ type: 'SELECT_ELEMENT', payload: { id: element.id } });
     }
+
+    setIsInteracting(true);
     
     const svg = (e.currentTarget as Element).ownerSVGElement;
     if (!svg) return;
@@ -170,13 +183,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
         
-        // Use a function for setTempTransform to get the latest value
-        setTempTransform(currentTempTransform => {
-            if (currentTempTransform) {
-                dispatch({ type: 'UPDATE_ELEMENT', payload: { id: element.id, ...currentTempTransform } });
-            }
-            return null; // Reset the temp transform
-        });
+        setIsInteracting(false);
         
         interactionRef.current = null;
         setSnapLines({ x: [], y: [] });
