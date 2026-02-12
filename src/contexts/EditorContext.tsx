@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useReducer, useEffect, ReactNode, Dispatch, useState, SetStateAction } from "react";
-import { CanvasElement, IconElement, ShapeElement, TextElement, ImageElement } from "@/lib/types";
+import { CanvasElement, IconElement, ShapeElement, TextElement, ImageElement, DrawingElement } from "@/lib/types";
 import { nanoid } from "nanoid";
 import { Loader2 } from "lucide-react";
 
@@ -185,7 +185,7 @@ function editorReducer(state: EditorState, action: Action): EditorState {
                 type: 'icon',
                 iconName: iconIdentifier,
                 name: iconIdentifier, // This is BaseElement.name
-                strokeColor: "#000000",
+                strokeColor: "#ffffff",
                 fill: 'none',
                 strokeWidth: 2,
                 ...restOfData,
@@ -193,10 +193,13 @@ function editorReducer(state: EditorState, action: Action): EditorState {
               break;
             }
             case 'shape':
-              newElement = { ...newElementDefaults, type: 'shape', shape: "rectangle", fill: "transparent", strokeColor: "#344054", strokeWidth: 2, ...data, ...(data?.shape === 'circle' && { width: 100, height: 100 }), ...(data?.shape === 'triangle' && { height: 87 }), ...(data?.shape === 'star' && { width: 100, height: 100 }), ...(data?.shape === 'hexagon' && { height: 87 }) } as ShapeElement;
+              newElement = { ...newElementDefaults, type: 'shape', shape: "rectangle", fill: "#ffffff", strokeColor: "transparent", strokeWidth: 0, ...data, ...(data?.shape === 'circle' && { width: 100, height: 100 }), ...(data?.shape === 'triangle' && { height: 87 }), ...(data?.shape === 'star' && { width: 100, height: 100 }), ...(data?.shape === 'hexagon' && { height: 87 }) } as ShapeElement;
               break;
             case 'image':
               newElement = { ...newElementDefaults, type: 'image', src: "", ...data } as ImageElement;
+              break;
+            case 'drawing':
+              newElement = { ...newElementDefaults, type: 'drawing', pathData: '', strokeColor: '#ffffff', strokeWidth: 5, pathOffsetX: 0, pathOffsetY: 0, ...data } as DrawingElement;
               break;
             default:
               throw new Error("Invalid element type");
@@ -309,6 +312,8 @@ function editorReducer(state: EditorState, action: Action): EditorState {
   }
 }
 
+type BrushState = { color: string; strokeWidth: number; opacity: number };
+
 export const EditorContext = createContext<{
   state: EditorState;
   dispatch: Dispatch<Action>;
@@ -316,6 +321,10 @@ export const EditorContext = createContext<{
   setIsSnapping: (isSnapping: boolean) => void;
   snapLines: { x: number[]; y: number[] };
   setSnapLines: Dispatch<SetStateAction<{ x: number[]; y: number[] }>>;
+  isDrawingMode: boolean;
+  setIsDrawingMode: (isDrawingMode: boolean) => void;
+  brush: BrushState;
+  setBrush: Dispatch<SetStateAction<BrushState>>;
 } | null>(null);
 
 export function EditorProvider({ children }: { children: ReactNode }) {
@@ -323,6 +332,9 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSnapping, setIsSnapping] = useState(true);
   const [snapLines, setSnapLines] = useState<{ x: number[]; y: number[] }>({ x: [], y: [] });
+  const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [brush, setBrush] = useState<BrushState>({ color: '#ffffff', strokeWidth: 5, opacity: 1 });
+
 
   useEffect(() => {
     const savedState = localStorage.getItem("logoForgeState");
@@ -345,6 +357,12 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     }
   }, [state, isLoaded]);
 
+  useEffect(() => {
+    if (state.selectedElement) {
+        setIsDrawingMode(false);
+    }
+  }, [state.selectedElement])
+
   if (!isLoaded) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
@@ -354,7 +372,18 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <EditorContext.Provider value={{ state, dispatch, isSnapping, setIsSnapping, snapLines, setSnapLines }}>
+    <EditorContext.Provider value={{ 
+        state, 
+        dispatch, 
+        isSnapping, 
+        setIsSnapping, 
+        snapLines, 
+        setSnapLines,
+        isDrawingMode,
+        setIsDrawingMode,
+        brush,
+        setBrush,
+    }}>
       {children}
     </EditorContext.Provider>
   );

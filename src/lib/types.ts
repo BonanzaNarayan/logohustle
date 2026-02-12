@@ -1,4 +1,4 @@
-export type ElementType = 'text' | 'icon' | 'shape' | 'image';
+export type ElementType = 'text' | 'icon' | 'shape' | 'image' | 'drawing';
 
 export type Position = { x: number; y: number };
 
@@ -62,4 +62,13 @@ export type ImageElement = BaseElement & {
   src: string;
 };
 
-export type CanvasElement = TextElement | IconElement | ShapeElement | ImageElement;
+export type DrawingElement = BaseElement & {
+    type: 'drawing';
+    pathData: string;
+    strokeColor: string;
+    strokeWidth: number;
+    pathOffsetX: number;
+    pathOffsetY: number;
+};
+
+export type CanvasElement = TextElement | IconElement | ShapeElement | ImageElement | DrawingElement;

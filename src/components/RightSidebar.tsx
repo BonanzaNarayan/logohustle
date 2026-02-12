@@ -10,6 +10,7 @@ import { TextProperties } from "./properties/TextProperties";
 import { ShapeProperties } from "./properties/ShapeProperties";
 import { CanvasBackgroundProperties } from "./properties/CanvasBackgroundProperties";
 import { IconProperties } from "./properties/IconProperties";
+import { DrawingProperties } from "./properties/DrawingProperties";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { LayersPanel } from "./LayersPanel";
 
@@ -39,6 +40,7 @@ export function RightSidebar() {
                   {selectedElement.type === 'text' && <TextProperties />}
                   {selectedElement.type === 'shape' && <ShapeProperties />}
                   {selectedElement.type === 'icon' && <IconProperties />}
+                  {selectedElement.type === 'drawing' && <DrawingProperties />}
                   
                   <Button variant="destructive" className="w-full" onClick={handleDelete}>
                     <Trash className="mr-2 h-4 w-4" />

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { CanvasElement, TextElement, IconElement, ShapeElement, ImageElement } from "@/lib/types";
+import { CanvasElement, TextElement, IconElement, ShapeElement, ImageElement, DrawingElement } from "@/lib/types";
 import { useEditor } from "@/hooks/useEditor";
 import { LucideIcon } from "@/lib/lucide-icons";
 
@@ -278,6 +278,21 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
     case 'image':
         const imageEl = displayElement as ImageElement;
         return <image href={imageEl.src} x="0" y="0" width={displayElement.width} height={displayElement.height} />;
+    case 'drawing': {
+        const drawingEl = displayElement as DrawingElement;
+        return (
+            <g transform={`translate(${-drawingEl.pathOffsetX}, ${-drawingEl.pathOffsetY})`}>
+                <path
+                    d={drawingEl.pathData}
+                    fill="none"
+                    stroke={drawingEl.strokeColor}
+                    strokeWidth={drawingEl.strokeWidth}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+            </g>
+        );
+      }
       default:
         return null;
     }
