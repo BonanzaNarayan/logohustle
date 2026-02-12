@@ -16,6 +16,7 @@ export type Shadow = {
 export type BaseElement = {
   id: string;
   type: ElementType;
+  name?: string;
   x: number;
   y: number;
   width: number;
@@ -31,14 +32,16 @@ export type TextElement = BaseElement & {
   fontFamily: string;
   fontSize: number;
   fontWeight: number;
-  color: string;
+  fill: string;
   align: 'start' | 'middle' | 'end';
+  strokeColor: string;
+  strokeWidth: number;
 };
 
 export type IconElement = BaseElement & {
   type: 'icon';
   name: string;
-  color: string;
+  strokeColor: string;
   fill: string;
   strokeWidth: number;
 };
@@ -47,7 +50,7 @@ export type ShapeType = 'rectangle' | 'circle' | 'triangle' | 'star' | 'hexagon'
 export type ShapeElement = BaseElement & {
   type: 'shape';
   shape: ShapeType;
-  color: string;
+  fill: string;
   strokeWidth: number;
   strokeColor: string;
 };

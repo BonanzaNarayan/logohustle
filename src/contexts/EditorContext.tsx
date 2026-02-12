@@ -174,13 +174,13 @@ function editorReducer(state: EditorState, action: Action): EditorState {
 
           switch(type) {
             case 'text':
-              newElement = { ...newElementDefaults, type: 'text', content: "Hello World", fontFamily: "Inter", fontSize: 48, fontWeight: 400, color: "#000000", align: 'middle', width: 250, height: 60, ...data } as TextElement;
+              newElement = { ...newElementDefaults, type: 'text', content: "Hello World", fontFamily: "Inter", fontSize: 48, fontWeight: 400, fill: "#000000", align: 'middle', strokeColor: 'transparent', strokeWidth: 0, width: 250, height: 60, ...data } as TextElement;
               break;
             case 'icon':
-              newElement = { ...newElementDefaults, type: 'icon', name: "Smile", color: "#000000", fill: 'none', strokeWidth: 2, ...data } as IconElement;
+              newElement = { ...newElementDefaults, type: 'icon', name: "Smile", strokeColor: "#000000", fill: 'none', strokeWidth: 2, ...data } as IconElement;
               break;
             case 'shape':
-              newElement = { ...newElementDefaults, type: 'shape', shape: "rectangle", color: "transparent", strokeColor: "#344054", strokeWidth: 2, ...data, ...(data?.shape === 'circle' && { width: 100, height: 100 }), ...(data?.shape === 'triangle' && { height: 87 }), ...(data?.shape === 'star' && { width: 100, height: 100 }), ...(data?.shape === 'hexagon' && { height: 87 }) } as ShapeElement;
+              newElement = { ...newElementDefaults, type: 'shape', shape: "rectangle", fill: "transparent", strokeColor: "#344054", strokeWidth: 2, ...data, ...(data?.shape === 'circle' && { width: 100, height: 100 }), ...(data?.shape === 'triangle' && { height: 87 }), ...(data?.shape === 'star' && { width: 100, height: 100 }), ...(data?.shape === 'hexagon' && { height: 87 }) } as ShapeElement;
               break;
             case 'image':
               newElement = { ...newElementDefaults, type: 'image', src: "", ...data } as ImageElement;

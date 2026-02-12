@@ -34,14 +34,14 @@ export function StyleProperties() {
 
   return (
     <>
-      {(('color' in selectedElement) || ('opacity' in selectedElement)) &&
+      {(('fill' in selectedElement) || ('opacity' in selectedElement)) &&
         <PropertiesGroup title="Styling">
-          {'color' in selectedElement && (
+          {'fill' in selectedElement && (
             <div className="col-span-2">
-                <Label className="text-xs">Color</Label>
+                <Label className="text-xs">Fill Color</Label>
                 <div className="flex items-center gap-2">
-                    <Input type="color" className="p-1 h-8 w-8" value={selectedElement.color} onChange={e => handleChange('color', e.target.value)} />
-                    <Input type="text" value={selectedElement.color} onChange={e => handleChange('color', e.target.value)} />
+                    <Input type="color" className="p-1 h-8 w-8" value={(selectedElement as any).fill} onChange={e => handleChange('fill', e.target.value)} />
+                    <Input type="text" value={(selectedElement as any).fill} onChange={e => handleChange('fill', e.target.value)} />
                 </div>
             </div>
           )}

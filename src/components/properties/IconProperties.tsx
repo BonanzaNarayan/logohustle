@@ -22,6 +22,13 @@ export function IconProperties() {
   return (
     <PropertiesGroup title="Icon">
         <div className="col-span-2">
+            <Label className="text-xs">Stroke Color</Label>
+            <div className="flex items-center gap-2">
+                 <Input type="color" className="p-1 h-8 w-8" value={iconElement.strokeColor} onChange={e => handleChange('strokeColor', e.target.value)} />
+                 <Input type="text" value={iconElement.strokeColor} onChange={e => handleChange('strokeColor', e.target.value)} />
+            </div>
+        </div>
+        <div className="col-span-2">
             <Label className="text-xs">Fill Color</Label>
             <div className="flex items-center gap-2">
                  <Input type="color" className="p-1 h-8 w-8" value={iconElement.fill} onChange={e => handleChange('fill', e.target.value)} />

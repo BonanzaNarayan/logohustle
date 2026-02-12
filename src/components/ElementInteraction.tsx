@@ -207,7 +207,9 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
             fontFamily={textEl.fontFamily}
             fontSize={textEl.fontSize}
             fontWeight={textEl.fontWeight}
-            fill={textEl.color}
+            fill={textEl.fill}
+            stroke={textEl.strokeColor}
+            strokeWidth={textEl.strokeWidth}
             style={{ userSelect: 'none' }}
           >
             {textEl.content}
@@ -218,7 +220,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
         return (
           <LucideIcon
             name={iconEl.name}
-            color={iconEl.color}
+            color={iconEl.strokeColor}
             fill={iconEl.fill}
             strokeWidth={iconEl.strokeWidth}
             width={displayElement.width}
@@ -229,7 +231,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
       case 'shape': {
         const shapeEl = displayElement as ShapeElement;
         const props = {
-            fill: shapeEl.color,
+            fill: shapeEl.fill,
             stroke: shapeEl.strokeColor,
             strokeWidth: shapeEl.strokeWidth
         };
