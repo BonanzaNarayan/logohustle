@@ -52,8 +52,10 @@ export function RightSidebar() {
               )}
             </ScrollArea>
         </TabsContent>
-        <TabsContent value="layers" className="flex-1 mt-0 overflow-y-auto">
-            <LayersPanel />
+        <TabsContent value="layers" className="flex-1 mt-0">
+            <ScrollArea className="h-full">
+              <LayersPanel />
+            </ScrollArea>
         </TabsContent>
       </Tabs>
     </aside>
