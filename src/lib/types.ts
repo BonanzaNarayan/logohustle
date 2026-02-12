@@ -36,6 +36,8 @@ export type TextElement = BaseElement & {
   align: 'start' | 'middle' | 'end';
   strokeColor: string;
   strokeWidth: number;
+  backgroundColor: string;
+  borderRadius: number;
 };
 
 export type IconElement = BaseElement & {

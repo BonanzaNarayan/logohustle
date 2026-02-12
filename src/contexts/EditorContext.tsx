@@ -174,7 +174,7 @@ function editorReducer(state: EditorState, action: Action): EditorState {
 
           switch(type) {
             case 'text':
-              newElement = { ...newElementDefaults, type: 'text', content: "Hello World", fontFamily: "Inter", fontSize: 48, fontWeight: 400, fill: "#000000", align: 'middle', strokeColor: 'transparent', strokeWidth: 0, width: 250, height: 60, ...data } as TextElement;
+              newElement = { ...newElementDefaults, type: 'text', content: "Hello World", fontFamily: "Inter", fontSize: 48, fontWeight: 400, fill: "#ffffff", align: 'middle', strokeColor: 'transparent', strokeWidth: 0, width: 250, height: 60, backgroundColor: 'transparent', borderRadius: 0, ...data } as TextElement;
               break;
             case 'icon': {
               const iconIdentifier = (data as any)?.name || "Smile";

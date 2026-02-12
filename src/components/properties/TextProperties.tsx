@@ -21,7 +21,7 @@ export function TextProperties() {
   const textElement = selectedElement as TextElement;
 
   const handleChange = (prop: string, value: any) => {
-     const isNumeric = ['fontSize', 'fontWeight', 'strokeWidth'].includes(prop);
+     const isNumeric = ['fontSize', 'fontWeight', 'strokeWidth', 'borderRadius'].includes(prop);
     dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, [prop]: isNumeric ? parseFloat(value) || 0 : value } });
   };
 
@@ -70,6 +70,19 @@ export function TextProperties() {
             <Label className="text-xs">Stroke Width</Label>
             <Input type="number" min={0} value={textElement.strokeWidth} onChange={e => handleChange('strokeWidth', e.target.value)} />
         </div>
+        <div className="col-span-2">
+            <Label className="text-xs">Background Color</Label>
+            <div className="flex items-center gap-2">
+                 <Input type="color" className="p-1 h-8 w-8" value={textElement.backgroundColor} onChange={e => handleChange('backgroundColor', e.target.value)} />
+                 <Input type="text" value={textElement.backgroundColor} onChange={e => handleChange('backgroundColor', e.target.value)} placeholder="transparent"/>
+            </div>
+        </div>
+        {textElement.backgroundColor && textElement.backgroundColor !== 'transparent' && (
+            <div>
+                <Label className="text-xs">Border Radius</Label>
+                <Input type="number" min={0} value={textElement.borderRadius} onChange={e => handleChange('borderRadius', e.target.value)} />
+            </div>
+        )}
     </PropertiesGroup>
   );
 }

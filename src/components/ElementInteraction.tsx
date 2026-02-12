@@ -196,25 +196,39 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
   
   const renderContent = () => {
     switch (displayElement.type) {
-      case 'text':
+      case 'text': {
         const textEl = displayElement as TextElement;
         return (
-          <text
-            x={textEl.width / 2}
-            y={textEl.height / 2}
-            dominantBaseline="central"
-            textAnchor={textEl.align}
-            fontFamily={textEl.fontFamily}
-            fontSize={textEl.fontSize}
-            fontWeight={textEl.fontWeight}
-            fill={textEl.fill}
-            stroke={textEl.strokeColor}
-            strokeWidth={textEl.strokeWidth}
-            style={{ userSelect: 'none' }}
-          >
-            {textEl.content}
-          </text>
+          <g>
+            {textEl.backgroundColor && textEl.backgroundColor !== 'transparent' && (
+              <rect
+                x="0"
+                y="0"
+                width={textEl.width}
+                height={textEl.height}
+                rx={textEl.borderRadius || 0}
+                ry={textEl.borderRadius || 0}
+                fill={textEl.backgroundColor}
+              />
+            )}
+            <text
+              x={textEl.width / 2}
+              y={textEl.height / 2}
+              dominantBaseline="central"
+              textAnchor={textEl.align}
+              fontFamily={textEl.fontFamily}
+              fontSize={textEl.fontSize}
+              fontWeight={textEl.fontWeight}
+              fill={textEl.fill}
+              stroke={textEl.strokeColor}
+              strokeWidth={textEl.strokeWidth}
+              style={{ userSelect: 'none' }}
+            >
+              {textEl.content}
+            </text>
+          </g>
         );
+      }
       case 'icon': {
         const iconEl = displayElement as IconElement;
         return (
