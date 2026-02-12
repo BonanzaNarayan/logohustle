@@ -10,17 +10,15 @@ import { IconPanel } from "./panels/IconPanel";
 import { TextPanel } from "./panels/TextPanel";
 import { ShapePanel } from "./panels/ShapePanel";
 import { UploadPanel } from "./panels/UploadPanel";
-import { DrawingPanel } from "./panels/DrawingPanel";
-import { LayoutGrid, Type, Shapes, Upload, Brush } from "lucide-react";
+import { LinePanel } from "./panels/LinePanel";
+import { LayoutGrid, Type, Shapes, Upload, Spline } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
-import { useEditor } from "@/hooks/useEditor";
 
 export function LeftSidebar() {
-  const { setIsDrawingMode } = useEditor();
 
   return (
     <aside className="w-[300px] bg-card border-r border-border flex flex-col">
-      <Tabs defaultValue="icons" className="flex-1 flex flex-col overflow-hidden" onValueChange={(value) => setIsDrawingMode(value === 'drawing')}>
+      <Tabs defaultValue="icons" className="flex-1 flex flex-col overflow-hidden">
         <TooltipProvider>
           <TabsList className="grid w-full grid-cols-5 rounded-none h-16 bg-transparent border-b border-border">
             <Tooltip>
@@ -49,9 +47,9 @@ export function LeftSidebar() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="drawing" className="h-full text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-primary/10 rounded-none"><Brush /></TabsTrigger>
+                <TabsTrigger value="lines" className="h-full text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-primary/10 rounded-none"><Spline /></TabsTrigger>
               </TooltipTrigger>
-              <TooltipContent side="right">Drawing</TooltipContent>
+              <TooltipContent side="right">Lines</TooltipContent>
             </Tooltip>
           </TabsList>
         </TooltipProvider>
@@ -69,8 +67,8 @@ export function LeftSidebar() {
           <TabsContent value="upload" className="mt-0 p-4">
             <UploadPanel />
           </TabsContent>
-          <TabsContent value="drawing" className="mt-0 p-4">
-            <DrawingPanel />
+          <TabsContent value="lines" className="mt-0 p-4">
+            <LinePanel />
           </TabsContent>
         </div>
       </Tabs>

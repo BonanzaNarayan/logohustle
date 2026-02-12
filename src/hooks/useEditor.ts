@@ -16,10 +16,6 @@ export const useEditor = () => {
     setIsSnapping, 
     snapLines, 
     setSnapLines,
-    isDrawingMode,
-    setIsDrawingMode,
-    brush,
-    setBrush
   } = context;
 
   const { history, historyIndex, clipboard } = state;
@@ -35,9 +31,5 @@ export const useEditor = () => {
     setIsSnapping,
     snapLines,
     setSnapLines,
-    isDrawingMode,
-    setIsDrawingMode,
-    brush,
-    setBrush
   };
 };

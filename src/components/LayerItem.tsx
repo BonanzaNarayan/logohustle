@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import type { XYCoord, Identifier } from 'dnd-core';
 import { useDrag, useDrop } from 'react-dnd';
-import { GripVertical, Type, Square, Smile, Image as ImageIcon, Brush } from 'lucide-react';
+import { GripVertical, Type, Square, Smile, Image as ImageIcon, Spline } from 'lucide-react';
 import { CanvasElement, IconElement } from '@/lib/types';
 import { useEditor } from '@/hooks/useEditor';
 import { cn } from '@/lib/utils';
@@ -30,7 +30,7 @@ const getLayerIcon = (type: CanvasElement['type']) => {
         case 'shape': return <Square className="h-4 w-4" />;
         case 'icon': return <Smile className="h-4 w-4" />;
         case 'image': return <ImageIcon className="h-4 w-4" />;
-        case 'drawing': return <Brush className="h-4 w-4" />;
+        case 'path': return <Spline className="h-4 w-4" />;
         default: return null;
     }
 }
@@ -43,7 +43,7 @@ const getLayerName = (element: CanvasElement) => {
         case 'shape': return element.shape.charAt(0).toUpperCase() + element.shape.slice(1);
         case 'icon': return (element as IconElement).iconName || 'Icon';
         case 'image': return "Image";
-        case 'drawing': return "Drawing";
+        case 'path': return "Path";
         default: return "Element";
     }
 }

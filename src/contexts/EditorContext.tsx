@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useReducer, useEffect, ReactNode, Dispatch, useState, SetStateAction } from "react";
-import { CanvasElement, IconElement, ShapeElement, TextElement, ImageElement, DrawingElement } from "@/lib/types";
+import { CanvasElement, IconElement, ShapeElement, TextElement, ImageElement, PathElement } from "@/lib/types";
 import { nanoid } from "nanoid";
 import { Loader2 } from "lucide-react";
 
@@ -59,7 +59,7 @@ const initialCanvasState = {
   width: 512,
   height: 512,
   backgroundType: 'solid',
-  background: '#111827',
+  background: '#1a1a1a',
   gradient: {
     color1: '#ffffff',
     color2: '#d4d4d8',
@@ -198,8 +198,8 @@ function editorReducer(state: EditorState, action: Action): EditorState {
             case 'image':
               newElement = { ...newElementDefaults, type: 'image', src: "", ...data } as ImageElement;
               break;
-            case 'drawing':
-              newElement = { ...newElementDefaults, type: 'drawing', pathData: '', strokeColor: '#ffffff', strokeWidth: 5, pathOffsetX: 0, pathOffsetY: 0, ...data } as DrawingElement;
+            case 'path':
+              newElement = { ...newElementDefaults, type: 'path', pathData: 'M 0 0 L 100 100', strokeColor: '#ffffff', strokeWidth: 5, ...data } as PathElement;
               break;
             default:
               throw new Error("Invalid element type");
@@ -312,8 +312,6 @@ function editorReducer(state: EditorState, action: Action): EditorState {
   }
 }
 
-type BrushState = { color: string; strokeWidth: number; opacity: number };
-
 export const EditorContext = createContext<{
   state: EditorState;
   dispatch: Dispatch<Action>;
@@ -321,10 +319,6 @@ export const EditorContext = createContext<{
   setIsSnapping: (isSnapping: boolean) => void;
   snapLines: { x: number[]; y: number[] };
   setSnapLines: Dispatch<SetStateAction<{ x: number[]; y: number[] }>>;
-  isDrawingMode: boolean;
-  setIsDrawingMode: (isDrawingMode: boolean) => void;
-  brush: BrushState;
-  setBrush: Dispatch<SetStateAction<BrushState>>;
 } | null>(null);
 
 export function EditorProvider({ children }: { children: ReactNode }) {
@@ -332,9 +326,6 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSnapping, setIsSnapping] = useState(true);
   const [snapLines, setSnapLines] = useState<{ x: number[]; y: number[] }>({ x: [], y: [] });
-  const [isDrawingMode, setIsDrawingMode] = useState(false);
-  const [brush, setBrush] = useState<BrushState>({ color: '#ffffff', strokeWidth: 5, opacity: 1 });
-
 
   useEffect(() => {
     const savedState = localStorage.getItem("logoForgeState");
@@ -357,12 +348,6 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     }
   }, [state, isLoaded]);
 
-  useEffect(() => {
-    if (state.selectedElement) {
-        setIsDrawingMode(false);
-    }
-  }, [state.selectedElement])
-
   if (!isLoaded) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
@@ -379,10 +364,6 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         setIsSnapping, 
         snapLines, 
         setSnapLines,
-        isDrawingMode,
-        setIsDrawingMode,
-        brush,
-        setBrush,
     }}>
       {children}
     </EditorContext.Provider>

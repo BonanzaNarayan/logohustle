@@ -2,88 +2,16 @@
 
 import { useEditor } from "@/hooks/useEditor";
 import { ElementInteraction } from "./ElementInteraction";
-import { useState, useRef } from "react";
 
 export function Canvas() {
-  const { state, dispatch, snapLines, isDrawingMode, brush, setIsDrawingMode } = useEditor();
+  const { state, dispatch, snapLines } = useEditor();
   const { canvas, elements } = state;
 
-  const [currentPath, setCurrentPath] = useState<string | null>(null);
-  const isDrawing = useRef(false);
-
-  const getSVGPoint = (e: React.MouseEvent | MouseEvent, svg: SVGSVGElement) => {
-    const point = svg.createSVGPoint();
-    point.x = e.clientX;
-    point.y = e.clientY;
-    const ctm = svg.getScreenCTM();
-    if (ctm) {
-      return point.matrixTransform(ctm.inverse());
-    }
-    return point;
-  };
-
   const handleCanvasMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (isDrawingMode) {
-      isDrawing.current = true;
-      const point = getSVGPoint(e, e.currentTarget);
-      setCurrentPath(`M ${point.x} ${point.y}`);
-      e.preventDefault();
-      e.stopPropagation();
-    } else {
       // If an element is clicked, propagation is stopped in ElementInteraction.
       // So this will only fire for clicks on the canvas background.
       dispatch({ type: "SELECT_ELEMENT", payload: { id: null } });
-    }
   };
-
-  const handleCanvasMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (isDrawingMode && isDrawing.current && currentPath) {
-      const point = getSVGPoint(e, e.currentTarget);
-      setCurrentPath((prev) => prev + ` L ${point.x} ${point.y}`);
-      e.preventDefault();
-    }
-  };
-
-  const handleCanvasMouseUp = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (isDrawingMode && isDrawing.current && currentPath) {
-      isDrawing.current = false;
-
-      // To get an accurate bounding box, we have to temporarily add it to the DOM
-      const tempPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      tempPath.setAttribute("d", currentPath);
-      const bbox = tempPath.getBBox();
-
-      if (bbox.width > 0 || bbox.height > 0) {
-        dispatch({
-          type: 'ADD_ELEMENT',
-          payload: {
-            type: 'drawing',
-            data: {
-              pathData: currentPath,
-              strokeColor: brush.color,
-              strokeWidth: brush.strokeWidth,
-              opacity: brush.opacity,
-              x: bbox.x,
-              y: bbox.y,
-              width: bbox.width,
-              height: bbox.height,
-              pathOffsetX: bbox.x,
-              pathOffsetY: bbox.y,
-            }
-          }
-        });
-      }
-      
-      setCurrentPath(null);
-      e.preventDefault();
-    }
-  };
-  
-  const handleMouseLeave = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (isDrawingMode && isDrawing.current) {
-        handleCanvasMouseUp(e);
-    }
-  }
 
   return (
     <div
@@ -95,10 +23,6 @@ export function Canvas() {
         height={canvas.height}
         viewBox={`0 0 ${canvas.width} ${canvas.height}`}
         onMouseDown={handleCanvasMouseDown}
-        onMouseMove={handleCanvasMouseMove}
-        onMouseUp={handleCanvasMouseUp}
-        onMouseLeave={handleMouseLeave}
-        style={{ cursor: isDrawingMode ? 'crosshair' : 'default' }}
       >
         <defs>
           {canvas.backgroundType === 'gradient' && (
@@ -189,18 +113,6 @@ export function Canvas() {
           <line key={`snap-y-${i}`} x1={0} y1={y} x2={canvas.width} y2={y} stroke="hsl(var(--ring))" strokeWidth="1" strokeDasharray="3,3" />
         ))}
         
-        {currentPath && (
-            <path
-                d={currentPath}
-                stroke={brush.color}
-                strokeWidth={brush.strokeWidth}
-                opacity={brush.opacity}
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ pointerEvents: 'none' }}
-            />
-        )}
       </svg>
     </div>
   );
