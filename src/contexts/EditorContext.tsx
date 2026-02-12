@@ -160,6 +160,8 @@ function editorReducer(state: EditorState, action: Action): EditorState {
             height: 100,
             rotation: 0,
             opacity: 1,
+            flipHorizontal: false,
+            flipVertical: false,
             shadow: {
               enabled: false,
               color: '#000000',

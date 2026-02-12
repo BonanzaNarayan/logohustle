@@ -145,10 +145,18 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
             
             let { x, y, width, height } = startElement;
 
-            if (resizeDirection.includes('e')) { width += rotatedDx; }
-            if (resizeDirection.includes('w')) { width -= rotatedDx; x += rotatedDx * cos; y += rotatedDx * sin; }
-            if (resizeDirection.includes('s')) { height += rotatedDy; }
-            if (resizeDirection.includes('n')) { height -= rotatedDy; x += rotatedDy * sin; y -= rotatedDy * cos; }
+            const hFlip = startElement.flipHorizontal;
+            const vFlip = startElement.flipVertical;
+
+            const east = hFlip ? 'w' : 'e';
+            const west = hFlip ? 'e' : 'w';
+            const north = vFlip ? 's' : 'n';
+            const south = vFlip ? 'n' : 's';
+
+            if (resizeDirection.includes(east)) { width += rotatedDx; }
+            if (resizeDirection.includes(west)) { width -= rotatedDx; x += rotatedDx * cos; y += rotatedDx * sin; }
+            if (resizeDirection.includes(south)) { height += rotatedDy; }
+            if (resizeDirection.includes(north)) { height -= rotatedDy; x += rotatedDy * sin; y -= rotatedDy * cos; }
 
             if (width < 10) width = 10;
             if (height < 10) height = 10;
@@ -298,6 +306,11 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
   };
 
   const hasShadow = displayElement.shadow?.enabled;
+  const flipX = displayElement.flipHorizontal ? -1 : 1;
+  const flipY = displayElement.flipVertical ? -1 : 1;
+  const translateX = displayElement.flipHorizontal ? displayElement.width : 0;
+  const translateY = displayElement.flipVertical ? displayElement.height : 0;
+  const flipTransform = `translate(${translateX}, ${translateY}) scale(${flipX}, ${flipY})`;
 
   return (
     <g
@@ -309,7 +322,9 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
         style={{ cursor: interactionRef.current?.interactionType === 'drag' ? 'grabbing' : 'grab' }}
       >
         <g opacity={displayElement.opacity} filter={hasShadow ? `url(#shadow-${displayElement.id})` : undefined}>
-            {renderContent()}
+            <g transform={flipTransform}>
+                {renderContent()}
+            </g>
         </g>
         
         {/* Transparent rect to ensure draggable area */}

@@ -24,6 +24,8 @@ export type BaseElement = {
   rotation: number;
   opacity: number;
   shadow: Shadow;
+  flipHorizontal: boolean;
+  flipVertical: boolean;
 };
 
 export type TextElement = BaseElement & {
