@@ -219,7 +219,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
         const iconEl = displayElement as IconElement;
         return (
           <LucideIcon
-            name={iconEl.name}
+            name={iconEl.iconName}
             color={iconEl.strokeColor}
             fill={iconEl.fill}
             strokeWidth={iconEl.strokeWidth}

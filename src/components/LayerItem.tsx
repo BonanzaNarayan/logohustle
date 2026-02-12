@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import type { XYCoord, Identifier } from 'dnd-core';
 import { useDrag, useDrop } from 'react-dnd';
 import { GripVertical, Type, Square, Smile, Image as ImageIcon } from 'lucide-react';
-import { CanvasElement } from '@/lib/types';
+import { CanvasElement, IconElement } from '@/lib/types';
 import { useEditor } from '@/hooks/useEditor';
 import { cn } from '@/lib/utils';
 
@@ -40,7 +40,7 @@ const getLayerName = (element: CanvasElement) => {
     switch (element.type) {
         case 'text': return element.content.substring(0, 20) || "Text";
         case 'shape': return element.shape.charAt(0).toUpperCase() + element.shape.slice(1);
-        case 'icon': return element.name || 'Icon';
+        case 'icon': return (element as IconElement).iconName || 'Icon';
         case 'image': return "Image";
         default: return "Element";
     }

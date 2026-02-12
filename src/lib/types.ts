@@ -40,7 +40,7 @@ export type TextElement = BaseElement & {
 
 export type IconElement = BaseElement & {
   type: 'icon';
-  name: string;
+  iconName: string;
   strokeColor: string;
   fill: string;
   strokeWidth: number;
