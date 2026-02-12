@@ -49,7 +49,14 @@ export function Canvas() {
           {elements.map(element => {
             if ('shadow' in element && element.shadow.enabled) {
                 return (
-                    <filter key={`shadow-${element.id}`} id={`shadow-${element.id}`}>
+                    <filter 
+                        key={`shadow-${element.id}`} 
+                        id={`shadow-${element.id}`}
+                        x="-50%"
+                        y="-50%"
+                        width="200%"
+                        height="200%"
+                    >
                         <feDropShadow
                             dx={element.shadow.offsetX}
                             dy={element.shadow.offsetY}
