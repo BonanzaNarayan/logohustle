@@ -1,6 +1,4 @@
 "use client";
-
-import { Logo } from "./Logo";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -24,6 +22,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { Logo } from "./Logo";
 
 export function Toolbar() {
   const { state, dispatch, canUndo, canRedo, isSnapping, setIsSnapping } = useEditor();
@@ -85,7 +84,7 @@ export function Toolbar() {
       }
       URL.revokeObjectURL(url);
     };
-    img.onerror = (e) => {
+    img.onerror = (e: any) => {
         console.error("Error loading SVG image for PNG export", e);
         toast({
             title: "Export Error",
@@ -134,8 +133,8 @@ export function Toolbar() {
         
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Clear Canvas">
-              <Trash2 className="text-destructive" />
+            <Button variant="outline" size="icon" aria-label="Clear Canvas">
+              <Trash2 className="text-rose-600" />
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
@@ -154,8 +153,8 @@ export function Toolbar() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button>
-              <Download className="mr-2 h-4 w-4" />
+            <Button size={'sm'}>
+              <Download className="" />
               Export
             </Button>
           </DropdownMenuTrigger>

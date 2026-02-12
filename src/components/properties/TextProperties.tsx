@@ -9,7 +9,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { TextElement } from "@/lib/types";
 
 const fontFamilies = [
-    "Inter", "Arial", "Helvetica", "Times New Roman", "Courier New", "Verdana", "Georgia", "Garamond", "Comic Sans MS", "Trebuchet MS"
+    "Pacifico",
+    "Lobster",
+    "Shadows Into Light",
+    "Abril Fatface",
+    "Playfair Display",
+    "Oswald",
+    "Roboto Slab",
+    "Inter", 
+    "Arial", 
+    "Helvetica", 
+    "Times New Roman", 
+    "Courier New", 
+    "Verdana", 
+    "Georgia",
 ];
 
 export function TextProperties() {
@@ -36,7 +49,7 @@ export function TextProperties() {
             <Select value={textElement.fontFamily} onValueChange={value => handleChange('fontFamily', value)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                    {fontFamilies.map(font => <SelectItem key={font} value={font}>{font}</SelectItem>)}
+                    {fontFamilies.map(font => <SelectItem key={font} value={font} style={{fontFamily: font}}>{font}</SelectItem>)}
                 </SelectContent>
             </Select>
         </div>
