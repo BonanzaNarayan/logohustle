@@ -4,6 +4,15 @@ export type Position = { x: number; y: number };
 
 export type Dimension = { width: number; height: number };
 
+export type Shadow = {
+  enabled: boolean;
+  color: string;
+  blur: number;
+  offsetX: number;
+  offsetY: number;
+  opacity: number;
+};
+
 export type BaseElement = {
   id: string;
   type: ElementType;
@@ -13,6 +22,7 @@ export type BaseElement = {
   height: number;
   rotation: number;
   opacity: number;
+  shadow: Shadow;
 };
 
 export type TextElement = BaseElement & {

@@ -267,6 +267,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
     }
   };
 
+  const hasShadow = displayElement.shadow?.enabled;
 
   return (
     <g
@@ -277,7 +278,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
         onMouseDown={(e) => handleMouseDown(e, 'drag')}
         style={{ cursor: interactionRef.current?.interactionType === 'drag' ? 'grabbing' : 'grab' }}
       >
-        <g opacity={displayElement.opacity}>
+        <g opacity={displayElement.opacity} filter={hasShadow ? `url(#shadow-${displayElement.id})` : undefined}>
             {renderContent()}
         </g>
         

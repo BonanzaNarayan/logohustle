@@ -160,6 +160,14 @@ function editorReducer(state: EditorState, action: Action): EditorState {
             height: 100,
             rotation: 0,
             opacity: 1,
+            shadow: {
+              enabled: false,
+              color: '#000000',
+              blur: 5,
+              offsetX: 5,
+              offsetY: 5,
+              opacity: 0.5,
+            },
           };
 
           let newElement: CanvasElement;

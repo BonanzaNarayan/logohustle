@@ -46,6 +46,22 @@ export function Canvas() {
                 <circle cx={5 * canvas.pattern.scale} cy={5 * canvas.pattern.scale} r={1 * canvas.pattern.scale} fill={canvas.pattern.color} />
             </pattern>
           )}
+          {elements.map(element => {
+            if ('shadow' in element && element.shadow.enabled) {
+                return (
+                    <filter key={`shadow-${element.id}`} id={`shadow-${element.id}`}>
+                        <feDropShadow
+                            dx={element.shadow.offsetX}
+                            dy={element.shadow.offsetY}
+                            stdDeviation={element.shadow.blur}
+                            floodColor={element.shadow.color}
+                            floodOpacity={element.shadow.opacity}
+                        />
+                    </filter>
+                )
+            }
+            return null;
+          })}
           {canvas.noise.enabled && (
             <filter id="noise-filter">
                 <feTurbulence 
