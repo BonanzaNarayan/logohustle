@@ -52,7 +52,8 @@ export type Action =
   | { type: 'DUPLICATE_ELEMENT' }
   | { type: 'UNDO' }
   | { type: 'REDO' }
-  | { type: 'CLEAR_CANVAS' };
+  | { type: 'CLEAR_CANVAS' }
+  | { type: 'REORDER_ELEMENTS', payload: { dragIndex: number, hoverIndex: number } };
 
 const initialCanvasState = {
   width: 512,
@@ -251,6 +252,23 @@ function editorReducer(state: EditorState, action: Action): EditorState {
                 selectedElement: null,
             };
             break;
+        }
+        case 'REORDER_ELEMENTS': {
+          const { dragIndex, hoverIndex } = action.payload;
+
+          if (dragIndex < 0 || dragIndex >= newPresent.elements.length || hoverIndex < 0 || hoverIndex >= newPresent.elements.length) {
+            break; 
+          }
+
+          const newElements = [...newPresent.elements];
+          const [draggedItem] = newElements.splice(dragIndex, 1);
+          newElements.splice(hoverIndex, 0, draggedItem);
+          
+          newPresent = {
+              ...newPresent,
+              elements: newElements,
+          };
+          break;
         }
       }
 
