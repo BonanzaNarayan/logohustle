@@ -32,6 +32,21 @@ export function CanvasBackgroundProperties() {
 
   return (
     <div className="p-4 space-y-6">
+      <PropertiesGroup title="Canvas Shape">
+        <div className="col-span-2 space-y-2">
+            <Label className="text-xs">Corner Radius</Label>
+            <div className="flex items-center gap-2">
+                <Slider 
+                  value={[canvas.borderRadius]} 
+                  onValueChange={value => handleChange('borderRadius', value[0])} 
+                  max={256} 
+                  step={1} 
+                />
+                <span className="text-xs w-10 text-right">{canvas.borderRadius}px</span>
+            </div>
+        </div>
+      </PropertiesGroup>
+
       <PropertiesGroup title="Background">
         <div className="col-span-2">
             <RadioGroup 

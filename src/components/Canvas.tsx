@@ -25,6 +25,10 @@ export function Canvas() {
         onMouseDown={handleCanvasMouseDown}
       >
         <defs>
+          <clipPath id="canvas-clip">
+            <rect width={canvas.width} height={canvas.height} rx={canvas.borderRadius} ry={canvas.borderRadius} />
+          </clipPath>
+
           {canvas.backgroundType === 'gradient' && (
             <linearGradient id="background-gradient" gradientTransform={`rotate(${canvas.gradient.angle}, 0.5, 0.5)`}>
               <stop offset="0%" stopColor={canvas.gradient.color1} />
@@ -81,37 +85,39 @@ export function Canvas() {
           )}
         </defs>
 
-        <rect
-          width="100%"
-          height="100%"
-          fill={canvas.backgroundType === 'solid' ? canvas.background : 'url(#background-gradient)'}
-        />
-
-        {canvas.pattern.type !== 'none' && (
+        <g clipPath="url(#canvas-clip)">
           <rect
             width="100%"
             height="100%"
-            fill={`url(#pattern-${canvas.pattern.type})`}
-            opacity={canvas.pattern.opacity}
-            style={{ filter: `blur(${canvas.pattern.blur}px)` }}
+            fill={canvas.backgroundType === 'solid' ? canvas.background : 'url(#background-gradient)'}
           />
-        )}
-        
-        {canvas.noise.enabled && (
-          <rect 
-            width="100%" 
-            height="100%" 
-            filter="url(#noise-filter)" 
-            opacity={canvas.noise.opacity} 
-            style={{ mixBlendMode: 'soft-light' }} 
-          />
-        )}
 
-        {elements.map((element) => (
-          <ElementInteraction key={element.id} element={element}>
-            {/* The actual rendering is handled inside ElementInteraction for simplicity */}
-          </ElementInteraction>
-        ))}
+          {canvas.pattern.type !== 'none' && (
+            <rect
+              width="100%"
+              height="100%"
+              fill={`url(#pattern-${canvas.pattern.type})`}
+              opacity={canvas.pattern.opacity}
+              style={{ filter: `blur(${canvas.pattern.blur}px)` }}
+            />
+          )}
+          
+          {canvas.noise.enabled && (
+            <rect 
+              width="100%" 
+              height="100%" 
+              filter="url(#noise-filter)" 
+              opacity={canvas.noise.opacity} 
+              style={{ mixBlendMode: 'soft-light' }} 
+            />
+          )}
+
+          {elements.map((element) => (
+            <ElementInteraction key={element.id} element={element}>
+              {/* The actual rendering is handled inside ElementInteraction for simplicity */}
+            </ElementInteraction>
+          ))}
+        </g>
 
         {snapLines.x.map((x, i) => (
           <line key={`snap-x-${i}`} x1={x} y1={0} x2={x} y2={canvas.height} stroke="hsl(var(--ring))" strokeWidth="1" strokeDasharray="3,3" />

@@ -10,6 +10,7 @@ export type EditorCoreState = {
   canvas: {
     width: number;
     height: number;
+    borderRadius: number;
     backgroundType: 'solid' | 'gradient';
     background: string;
     gradient: {
@@ -58,6 +59,7 @@ export type Action =
 const initialCanvasState = {
   width: 512,
   height: 512,
+  borderRadius: 0,
   backgroundType: 'solid',
   background: '#1a1a1a',
   gradient: {
