@@ -41,6 +41,11 @@ export function Toolbar() {
 
     const svgClone = svgNode.cloneNode(true) as SVGSVGElement;
     
+    // Embed Google Fonts CSS into the SVG so they are applied in the exported file
+    const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+    style.textContent = `@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Inter:wght@400;500;600;700&family=Lobster&family=Oswald&family=Pacifico&family=Playfair+Display&family=Roboto+Slab&family=Shadows+Into+Light&display=swap');`;
+    svgClone.insertBefore(style, svgClone.firstChild);
+
     // Remove selection handles
     const interactionHandles = svgClone.querySelector('[data-interaction-handles="true"]');
     if (interactionHandles) {

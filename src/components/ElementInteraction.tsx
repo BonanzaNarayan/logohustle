@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -6,26 +5,16 @@ import { CanvasElement, TextElement, IconElement, ShapeElement, ImageElement, Pa
 import { useEditor } from "@/hooks/useEditor";
 import { LucideIcon } from "@/lib/lucide-icons";
 
-type TempTransform = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  rotation: number;
-};
-
 export const ElementInteraction = React.memo(function ElementInteraction({ element }: { element: CanvasElement }) {
   const { state, dispatch, isSnapping, setSnapLines } = useEditor();
   const { elements, canvas } = state;
   
-  const [tempTransform, setTempTransform] = useState<TempTransform | null>(null);
+  const [tempTransform, setTempTransform] = useState<Partial<CanvasElement> | null>(null);
   const [isInteracting, setIsInteracting] = useState(false);
 
   useEffect(() => {
-    // When interaction stops, if there's a temporary transform, dispatch the update.
     if (!isInteracting && tempTransform) {
-      dispatch({ type: 'UPDATE_ELEMENT', payload: { id: element.id, ...tempTransform } });
-      // Clear the temporary transform after dispatching
+      dispatch({ type: 'UPDATE_ELEMENT', payload: { id: element.id, ...tempTransform } as any });
       setTempTransform(null);
     }
   }, [isInteracting, tempTransform, dispatch, element.id]);
@@ -43,7 +32,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
   
   const isSelected = state.selectedElement?.id === element.id;
 
-  const displayElement = tempTransform ? { ...element, ...tempTransform } : element;
+  const displayElement = tempTransform ? { ...element, ...tempTransform } as CanvasElement : element;
 
   const getSVGPoint = (e: MouseEvent | React.MouseEvent, svg: SVGSVGElement) => {
     const point = svg.createSVGPoint();
@@ -99,7 +88,7 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
         const dx = currentPoint.x - startPoint.x;
         const dy = currentPoint.y - startPoint.y;
         
-        let newTransform: TempTransform = {
+        let newTransform: Partial<CanvasElement> = {
             x: startElement.x, y: startElement.y,
             width: startElement.width, height: startElement.height,
             rotation: startElement.rotation,
@@ -175,6 +164,13 @@ export const ElementInteraction = React.memo(function ElementInteraction({ eleme
             if (height < 10) height = 10;
             
             newTransform = { x, y, width, height, rotation: startElement.rotation };
+
+            // Sync font size with height for text elements
+            if (startElement.type === 'text') {
+              const textEl = startElement as TextElement;
+              const scaleY = height / startElement.height;
+              (newTransform as any).fontSize = Math.round(textEl.fontSize * scaleY);
+            }
         }
         setTempTransform(newTransform);
     };

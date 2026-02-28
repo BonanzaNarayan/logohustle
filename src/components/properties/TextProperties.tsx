@@ -34,8 +34,17 @@ export function TextProperties() {
   const textElement = selectedElement as TextElement;
 
   const handleChange = (prop: string, value: any) => {
-     const isNumeric = ['fontSize', 'fontWeight', 'strokeWidth', 'borderRadius'].includes(prop);
-    dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, [prop]: isNumeric ? parseFloat(value) || 0 : value } });
+    const isNumeric = ['fontSize', 'fontWeight', 'strokeWidth', 'borderRadius'].includes(prop);
+    const numericValue = isNumeric ? parseFloat(value) || 0 : value;
+    
+    const updates: any = { [prop]: numericValue };
+
+    // If font size changes, update height to match
+    if (prop === 'fontSize') {
+      updates.height = numericValue * 1.25; // Approximate line height
+    }
+
+    dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, ...updates } });
   };
 
   return (
