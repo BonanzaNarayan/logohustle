@@ -86,7 +86,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Inter:wght@400;500;600;700&family=Lobster&family=Oswald&family=Pacifico&family=Playfair+Display&family=Roboto+Slab&family=Shadows+Into+Light&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bangers&family=Comfortaa:wght@300..700&family=Courgette&family=Dancing+Script:wght@400..700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Lobster&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Oswald:wght@200..700&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Righteous&family=Roboto+Slab:wght@100..900&family=Satisfy&family=Shadows+Into+Light&family=Special+Elite&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
         {children}

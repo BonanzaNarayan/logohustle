@@ -41,12 +41,12 @@ export function Toolbar() {
 
     const svgClone = svgNode.cloneNode(true) as SVGSVGElement;
     
-    // Embed Google Fonts CSS into the SVG so they are applied in the exported file
+    // Embed all Google Fonts CSS into the SVG so they are applied in the exported file
     const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
-    style.textContent = `@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Inter:wght@400;500;600;700&family=Lobster&family=Oswald&family=Pacifico&family=Playfair+Display&family=Roboto+Slab&family=Shadows+Into+Light&display=swap');`;
+    style.textContent = `@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bangers&family=Comfortaa:wght@300..700&family=Courgette&family=Dancing+Script:wght@400..700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Lobster&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Oswald:wght@200..700&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Righteous&family=Roboto+Slab:wght@100..900&family=Satisfy&family=Shadows+Into+Light&family=Special+Elite&display=swap');`;
     svgClone.insertBefore(style, svgClone.firstChild);
 
-    // Remove selection handles
+    // Remove selection handles and interaction UI
     const interactionHandles = svgClone.querySelector('[data-interaction-handles="true"]');
     if (interactionHandles) {
       interactionHandles.remove();
@@ -63,17 +63,23 @@ export function Toolbar() {
     }
   };
 
-  const handleExportPNG = () => {
+  const handleExportPNG = async () => {
     const svgString = getSvgString();
     if (!svgString) return;
+
+    // Ensure all document fonts are ready before export to canvas
+    if (typeof document !== 'undefined' && 'fonts' in document) {
+      await document.fonts.ready;
+    }
 
     const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
     const url = URL.createObjectURL(svgBlob);
     
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const scale = 2; // for better quality
+      const scale = 2; // For higher resolution
       canvas.width = (state.canvas.width || 512) * scale;
       canvas.height = (state.canvas.height || 512) * scale;
       const ctx = canvas.getContext('2d');
@@ -93,7 +99,7 @@ export function Toolbar() {
         console.error("Error loading SVG image for PNG export", e);
         toast({
             title: "Export Error",
-            description: "Could not export to PNG. Icons might not be loading correctly.",
+            description: "Could not export to PNG. This often happens if the browser restricts font loading in high-security environments.",
             variant: "destructive"
         })
         URL.revokeObjectURL(url);
